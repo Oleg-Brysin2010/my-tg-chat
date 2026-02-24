@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TG Clone: Roskamnadzor</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background-color: #0e1621; color: white; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+        .chat-bg { 
+            background-color: #0e1621; 
+            background-image: url('https://www.transparenttextures.com/patterns/carbon-fibre.png');
+        }
+        .msg { max-width: 80%; padding: 8px 15px; border-radius: 15px; margin-bottom: 8px; font-size: 15px; position: relative; line-height: 1.4; }
+        .msg-in { background: #182533; align-self: flex-start; border-radius: 15px 15px 15px 5px; border: 1px solid #232e3c; }
+        .msg-out { background: #2b5278; align-self: flex-end; border-radius: 15px 15px 5px 15px; }
+        .hidden { display: none !important; }
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-thumb { background: #242f3d; border-radius: 10px; }
+    </style>
+</head>
+<body class="h-screen flex flex-col overflow-hidden">
+
+    <div id="authScreen" class="flex-1 flex items-center justify-center p-4">
+        <div class="bg-[#17212b] p-8 rounded-2xl w-full max-w-[360px] shadow-2xl text-center">
+            <div class="mb-6 flex justify-center">
+                <div class="w-20 h-20 bg-blue-500 rounded-full flex items-center justify-center text-3xl shadow-lg">🚀</div>
+            </div>
+            <h1 class="text-xl font-bold mb-6">Войти в мессенджер</h1>
+            <input type="email" id="email" placeholder="Эл. почта" class="w-full p-3 mb-3 rounded-lg bg-[#242f3d] outline-none border border-gray-700 focus:border-blue-500 text-sm">
+            <input type="password" id="password" placeholder="Пароль" class="w-full p-3 mb-6 rounded-lg bg-[#242f3d] outline-none border border-gray-700 focus:border-blue-500 text-sm">
+            <button onclick="login()" class="w-full bg-blue-500 py-3 rounded-lg font-bold mb-4 hover:bg-blue-600 transition shadow-lg">ВОЙТИ</button>
+            <button onclick="register()" class="text-blue-400 text-sm hover:underline">Создать аккаунт</button>
+        </div>
+    </div>
+
+    <div id="chatScreen" class="hidden flex-1 flex flex-col overflow-hidden">
+        <header class="bg-[#17212b] p-3 flex justify-between items-center shadow-md border-b border-black/20">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-gradient-to-tr from-blue-600 to-blue-400 rounded-full flex items-center justify-center font-bold">R</div>
+                <div>
+                    <b class="block text-sm">Общий чат</b>
+                    <small id="userLabel" class="text-gray-400 text-[10px]"></small>
+                </div>
+            </div>
+            <button onclick="logout()" class="text-gray-400 hover:text-red-400 p-2 transition">Выход</button>
+        </header>
+
+        <div id="messages" class="flex-1 chat-bg p-4 flex flex-col overflow-y-auto">
+            </div>
+
+        <form onsubmit="sendMessage(event)" class="p-3 bg-[#17212b] flex gap-2 items-center">
+            <input type="text" id="msgInput" placeholder="Написать сообщение..." autocomplete="off" 
+                   class="flex-1 bg-[#0e1621] p-3 rounded-full outline-none px-5 text-sm focus:ring-1 focus:ring-blue-500 transition">
+            <button type="submit" class="bg-blue-500 w-11 h-11 rounded-full flex items-center justify-center hover:scale-105 transition shadow-lg">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="white"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+            </button>
+        </form>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        // Твои настройки уже здесь
+        const firebaseConfig = {
+            apiKey: "AIzaSyCiduYZfuWiAoJOuTuhmdDRbPWlpL1jmw4",
+            authDomain: "telegram-clone-roskamnadzor.firebaseapp.com",
+            projectId: "telegram-clone-roskamnadzor",
+            storageBucket: "telegram-clone-roskamnadzor.firebasestorage.app",
+            messagingSenderId: "935106885464",
+            appId: "1:935106885464:web:308629db74f952bea3172d",
+            measurementId: "G-S4SM6LWZZQ"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // Функции
+        window.register = () => {
+            const e = document.getElementById('email').value, p = document.getElementById('password').value;
+            if(p.length < 6) return alert("Пароль должен быть от 6 символов!");
+            createUserWithEmailAndPassword(auth, e, p).catch(err => alert("Ошибка: " + err.message));
+        };
+
+        window.login = () => {
+            const e = document.getElementById('email').value, p = document.getElementById('password').value;
+            signInWithEmailAndPassword(auth, e, p).catch(err => alert("Неверный логин или пароль"));
+        };
+
+        window.logout = () => signOut(auth);
+
+        window.sendMessage = async (e) => {
+            e.preventDefault();
+            const input = document.getElementById('msgInput');
+            const val = input.value.trim();
+            if(!val) return;
+            
+            input.value = '';
+            await addDoc(collection(db, "messages"), {
+                text: val,
+                sender: auth.currentUser.email,
+                createdAt: serverTimestamp()
+            });
+        };
+
+        onAuthStateChanged(auth, user => {
+            document.getElementById('authScreen').classList.toggle('hidden', !!user);
+            document.getElementById('chatScreen').classList.toggle('hidden', !user);
+            if(user) {
+                document.getElementById('userLabel').innerText = user.email;
+                loadMessages();
+            }
+        });
+
+        function loadMessages() {
+            const q = query(collection(db, "messages"), orderBy("createdAt", "asc"));
+            onSnapshot(q, (snapshot) => {
+                const container = document.getElementById('messages');
+                container.innerHTML = '';
+                snapshot.forEach(doc => {
+                    const d = doc.data();
+                    const isMe = d.sender === auth.currentUser.email;
+                    const time = d.createdAt ? d.createdAt.toDate().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) : '';
+                    
+                    const msgDiv = document.createElement('div');
+                    msgDiv.className = `msg ${isMe ? 'msg-out' : 'msg-in'}`;
+                    msgDiv.innerHTML = `
+                        ${!isMe ? `<div class="text-[10px] text-blue-400 font-bold mb-1">${d.sender.split('@')[0]}</div>` : ''}
+                        <div class="flex items-end gap-2">
+                            <span class="break-words">${d.text}</span>
+                            <span class="text-[9px] text-gray-400 min-w-[30px] text-right">${time}</span>
+                        </div>`;
+                    container.appendChild(msgDiv);
+                });
+                container.scrollTop = container.scrollHeight;
+            });
+        }
+    </script>
+</body>
+</html>
