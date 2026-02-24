@@ -2,81 +2,114 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>TG Premium Pro</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Discord Clone v2</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap');
-        body { background-color: #0e1621; color: white; font-family: 'Inter', sans-serif; height: 100vh; overflow: hidden; }
-        .chat-wallpaper { background: #0e1621 url('https://i.pinimg.com/originals/ab/ab/60/abab600f6ab38f13b65d8c3924ad5ca1.jpg') center/cover; position: relative; }
-        .chat-wallpaper::before { content: ""; position: absolute; inset: 0; background: rgba(14, 22, 33, 0.92); }
-        .glass { background: rgba(23, 33, 43, 0.95); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(255,255,255,0.05); }
-        .msg-card { max-width: 85%; padding: 8px 12px; border-radius: 18px; font-size: 15px; position: relative; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
-        .msg-in { background: #182533; align-self: flex-start; border-bottom-left-radius: 4px; }
-        .msg-out { background: #2b5278; align-self: flex-end; border-bottom-right-radius: 4px; }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        
+        body { 
+            background-color: #313338; 
+            color: #f2f3f5; 
+            font-family: 'Inter', sans-serif;
+            height: 100vh; overflow: hidden;
+        }
+
+        /* Цвета Discord */
+        .bg-sidebar { background-color: #2b2d31; }
+        .bg-chat { background-color: #313338; }
+        .bg-dark { background-color: #1e1f22; }
+        .discord-blurple { background-color: #5865f2; }
+        
+        /* Скроллбар */
+        #messages::-webkit-scrollbar { width: 8px; }
+        #messages::-webkit-scrollbar-thumb { background: #1a1b1e; border-radius: 4px; }
+
+        .user-dot {
+            position: absolute; bottom: -2px; right: -2px;
+            width: 14px; height: 14px; background: #23a55a;
+            border: 3px solid #232428; border-radius: 50%;
+        }
         .hidden { display: none !important; }
-        .modal-bg { background: rgba(0,0,0,0.8); backdrop-filter: blur(8px); }
     </style>
 </head>
-<body class="flex flex-col">
+<body class="flex">
 
-    <div id="authScreen" class="flex-1 flex items-center justify-center p-6 z-50 bg-[#0e1621]">
-        <div class="bg-[#17212b] p-8 rounded-[32px] w-full max-w-[380px] shadow-2xl border border-white/5 text-center">
-            <div class="text-5xl mb-4">✨</div>
-            <h1 class="text-2xl font-bold mb-6">Вход в систему</h1>
-            <input type="email" id="email" placeholder="Email" class="w-full bg-[#0e1621] p-4 rounded-2xl mb-3 outline-none border border-white/10 focus:border-blue-500 transition">
-            <input type="password" id="password" placeholder="Пароль" class="w-full bg-[#0e1621] p-4 rounded-2xl mb-6 outline-none border border-white/10 focus:border-blue-500 transition">
-            <button id="loginBtn" class="w-full bg-blue-500 py-4 rounded-2xl font-bold mb-4 shadow-lg hover:bg-blue-600 transition">Войти</button>
-            <button id="regBtn" class="text-blue-400 text-sm hover:underline">Создать аккаунт</button>
+    <div id="authScreen" class="fixed inset-0 z-[100] bg-[#5865f2] flex items-center justify-center p-4">
+        <div class="bg-[#313338] p-8 rounded-lg shadow-2xl w-full max-w-[420px]">
+            <h1 class="text-2xl font-bold text-center mb-6">С возвращением!</h1>
+            <div class="mb-4">
+                <label class="block text-xs font-bold text-[#b5bac1] uppercase mb-2">Электронная почта</label>
+                <input type="email" id="email" class="w-full bg-[#1e1f22] p-2.5 rounded outline-none border border-transparent focus:border-[#00a8fc]">
+            </div>
+            <div class="mb-6">
+                <label class="block text-xs font-bold text-[#b5bac1] uppercase mb-2">Пароль</label>
+                <input type="password" id="password" class="w-full bg-[#1e1f22] p-2.5 rounded outline-none border border-transparent focus:border-[#00a8fc]">
+            </div>
+            <button id="loginBtn" class="w-full discord-blurple py-3 rounded font-medium hover:bg-[#4752c4] transition mb-3">Вход</button>
+            <button id="regBtn" class="text-sm text-[#00a8fc] hover:underline">Зарегистрироваться</button>
         </div>
     </div>
 
-    <div id="profileModal" class="hidden fixed inset-0 modal-bg z-[100] flex items-center justify-center p-6">
-        <div class="bg-[#17212b] p-8 rounded-[32px] w-full max-w-[340px] border border-white/10 shadow-2xl text-center">
-            <h2 class="text-xl font-bold mb-6">Ваш Профиль</h2>
-            <div class="w-20 h-20 bg-blue-500 rounded-full mx-auto mb-4 flex items-center justify-center text-3xl font-bold shadow-lg" id="profileAvatar">?</div>
-            <p class="text-[10px] text-gray-500 uppercase font-bold mb-2">Изменить имя:</p>
-            <input type="text" id="userNameInput" placeholder="Ваше имя..." class="w-full bg-[#0e1621] p-4 rounded-2xl mb-6 outline-none border border-white/10 focus:border-blue-500">
-            <div class="flex gap-2">
-                <button id="saveProfileBtn" class="flex-1 bg-blue-500 py-3 rounded-xl font-bold text-sm">ОК</button>
-                <button id="closeProfileBtn" class="flex-1 bg-gray-700 py-3 rounded-xl font-bold text-sm text-gray-300">Отмена</button>
+    <aside class="w-64 bg-sidebar flex flex-col shrink-0 hidden md:flex">
+        <div class="h-12 border-b border-[#1e1f22] flex items-center px-4 font-bold shadow-sm">Чат Сервер</div>
+        <div class="flex-1 p-2">
+            <div class="bg-[#3f4147] text-white px-2 py-1.5 rounded flex items-center gap-2 mb-1">
+                <span class="text-gray-400 text-xl">#</span> основной
             </div>
         </div>
-    </div>
-
-    <div id="chatScreen" class="hidden flex-1 flex flex-col overflow-hidden">
-        <div id="verifyWarning" class="hidden bg-orange-500/20 border-b border-orange-500/30 px-4 py-2 text-[11px] text-orange-300 text-center flex justify-between items-center">
-            <span>Почта не подтверждена! Проверьте спам.</span>
-            <button id="resendBtn" class="bg-orange-500 text-white px-2 py-1 rounded font-bold">Выслать еще раз</button>
-        </div>
-
-        <header class="glass px-5 py-3 flex justify-between items-center z-20">
-            <div class="flex items-center gap-3">
-                <div id="openProfileBtn" class="w-10 h-10 bg-gradient-to-br from-indigo-500 to-blue-600 rounded-full flex items-center justify-center font-bold cursor-pointer hover:scale-105 transition shadow-lg">?</div>
-                <div>
-                    <h2 id="displayUserName" class="font-bold text-[14px]">Загрузка...</h2>
-                    <p class="text-[10px] text-green-400">онлайн</p>
-                </div>
+        <div class="bg-[#232428] p-2 flex items-center gap-2">
+            <div class="relative">
+                <div id="myAvatar" class="w-8 h-8 rounded-full bg-indigo-500 flex items-center justify-center font-bold text-xs uppercase">?</div>
+                <div class="user-dot"></div>
             </div>
-            <button id="logoutBtn" class="text-gray-500 text-xs hover:text-red-400 transition">Выход</button>
+            <div class="flex-1 overflow-hidden">
+                <div id="myName" class="text-sm font-bold truncate">User</div>
+                <div class="text-[10px] text-gray-400">В сети</div>
+            </div>
+            <button id="openProfileBtn" class="hover:bg-white/10 p-1.5 rounded text-gray-400">⚙️</button>
+        </div>
+    </aside>
+
+    <main class="flex-1 flex flex-col min-w-0 bg-chat">
+        <header class="h-12 border-b border-[#1e1f22] flex items-center px-4 gap-2 shadow-sm">
+            <span class="text-gray-400 text-2xl">#</span>
+            <span class="font-bold">основной</span>
         </header>
+        
+        <div id="messages" class="flex-1 overflow-y-auto p-4 space-y-4"></div>
 
-        <div id="messages" class="flex-1 chat-wallpaper p-4 flex flex-col gap-2 overflow-y-auto z-10"></div>
+        <form id="msgForm" class="p-4">
+            <div class="bg-[#383a40] rounded-lg px-4 py-2.5 flex items-center">
+                <input type="text" id="msgInput" placeholder="Написать в #основной" autocomplete="off" class="w-full bg-transparent outline-none text-[15px]">
+            </div>
+        </form>
+    </main>
 
-        <footer class="glass p-3 z-20">
-            <form id="msgForm" class="max-w-4xl mx-auto flex gap-3">
-                <input type="text" id="msgInput" placeholder="Написать сообщение..." autocomplete="off" class="flex-1 bg-[#242f3d]/80 p-3 rounded-2xl outline-none text-sm border border-white/5 focus:border-blue-500 transition">
-                <button type="submit" class="bg-blue-500 w-12 h-12 rounded-full flex items-center justify-center shadow-lg hover:scale-105 active:scale-90 transition shadow-blue-500/30">
-                    <svg viewBox="0 0 24 24" width="22" height="22" fill="white"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
-                </button>
-            </form>
-        </footer>
+    <aside class="w-60 bg-sidebar p-4 hidden lg:block shrink-0">
+        <h3 class="text-xs font-bold text-[#949ba4] uppercase mb-4 tracking-wider">В сети — <span id="onlineCount">0</span></h3>
+        <div id="userList" class="space-y-1"></div>
+    </aside>
+
+    <div id="profileModal" class="hidden fixed inset-0 z-[200] bg-black/80 flex items-center justify-center p-4">
+        <div class="bg-chat rounded-lg w-full max-w-[340px] overflow-hidden shadow-2xl">
+            <div class="h-12 discord-blurple"></div>
+            <div class="p-6">
+                <h2 class="text-xl font-bold mb-4">Настройки аккаунта</h2>
+                <input type="text" id="userNameInput" placeholder="Ваш новый ник" class="w-full bg-dark p-3 rounded mb-6 outline-none border border-transparent focus:border-blue-500">
+                <div class="flex gap-2">
+                    <button id="saveProfileBtn" class="flex-1 bg-green-600 py-2 rounded font-bold hover:bg-green-700">Сохранить</button>
+                    <button id="closeProfileBtn" class="flex-1 bg-gray-600 py-2 rounded font-bold hover:bg-gray-700">Отмена</button>
+                </div>
+                <button id="logoutBtn" class="w-full mt-4 text-red-400 text-xs">Выйти из системы</button>
+            </div>
+        </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, sendEmailVerification, updateProfile } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, updateProfile } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, setDoc, doc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyCiduYZfuWiAoJOuTuhmdDRbPWlpL1jmw4",
@@ -85,99 +118,104 @@
             storageBucket: "telegram-clone-roskamnadzor.firebasestorage.app",
             messagingSenderId: "935106885464",
             appId: "1:935106885464:web:308629db74f952bea3172d",
-            measurementId: "G-S4SM6LWZZQ"
         };
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // --- AUTH LOGIC ---
-        document.getElementById('regBtn').onclick = async () => {
-            const e = document.getElementById('email').value, p = document.getElementById('password').value;
-            try {
-                const res = await createUserWithEmailAndPassword(auth, e, p);
-                await sendEmailVerification(res.user);
-                alert("Аккаунт создан! Письмо отправлено.");
-            } catch(err) { alert(err.message); }
-        };
+        async function updatePresence(user, status) {
+            if (!user) return;
+            await setDoc(doc(db, "presence", user.uid), {
+                name: user.displayName || user.email.split('@')[0],
+                status: status
+            }, { merge: true });
+        }
 
+        document.getElementById('regBtn').onclick = () => {
+            const e = document.getElementById('email').value, p = document.getElementById('password').value;
+            createUserWithEmailAndPassword(auth, e, p).catch(err => alert(err.message));
+        };
         document.getElementById('loginBtn').onclick = () => {
             const e = document.getElementById('email').value, p = document.getElementById('password').value;
             signInWithEmailAndPassword(auth, e, p).catch(() => alert("Ошибка входа"));
         };
-
-        document.getElementById('logoutBtn').onclick = () => signOut(auth);
-        document.getElementById('resendBtn').onclick = () => {
-            sendEmailVerification(auth.currentUser).then(() => alert("Письмо отправлено повторно!"));
+        document.getElementById('logoutBtn').onclick = async () => {
+            await updatePresence(auth.currentUser, "offline");
+            signOut(auth).then(() => location.reload());
         };
 
-        // --- PROFILE LOGIC ---
-        const profileModal = document.getElementById('profileModal');
-        document.getElementById('openProfileBtn').onclick = () => profileModal.classList.remove('hidden');
-        document.getElementById('closeProfileBtn').onclick = () => profileModal.classList.add('hidden');
-        
+        document.getElementById('openProfileBtn').onclick = () => document.getElementById('profileModal').classList.remove('hidden');
+        document.getElementById('closeProfileBtn').onclick = () => document.getElementById('profileModal').classList.add('hidden');
         document.getElementById('saveProfileBtn').onclick = async () => {
-            const name = document.getElementById('userNameInput').value.trim();
-            if(name.length < 2) return;
-            await updateProfile(auth.currentUser, { displayName: name });
-            profileModal.classList.add('hidden');
-            updateUI(auth.currentUser);
+            const n = document.getElementById('userNameInput').value.trim();
+            if(n) {
+                await updateProfile(auth.currentUser, { displayName: n });
+                await updatePresence(auth.currentUser, "online");
+                location.reload();
+            }
         };
 
-        // --- OBSERVER ---
         onAuthStateChanged(auth, user => {
             document.getElementById('authScreen').classList.toggle('hidden', !!user);
-            document.getElementById('chatScreen').classList.toggle('hidden', !user);
             if(user) {
-                updateUI(user);
+                const name = user.displayName || user.email.split('@')[0];
+                document.getElementById('myName').innerText = name;
+                document.getElementById('myAvatar').innerText = name[0];
+                updatePresence(user, "online");
                 loadMessages();
+                loadUsers();
             }
         });
 
-        function updateUI(user) {
-            const name = user.displayName || user.email.split('@')[0];
-            document.getElementById('displayUserName').innerText = name;
-            document.getElementById('openProfileBtn').innerText = name[0].toUpperCase();
-            document.getElementById('profileAvatar').innerText = name[0].toUpperCase();
-            document.getElementById('verifyWarning').classList.toggle('hidden', user.emailVerified);
-        }
-
-        // --- CHAT LOGIC ---
         document.getElementById('msgForm').onsubmit = async (e) => {
             e.preventDefault();
             const input = document.getElementById('msgInput');
             if(!input.value.trim()) return;
-            const text = input.value;
-            input.value = '';
+            const text = input.value; input.value = '';
             await addDoc(collection(db, "messages"), {
-                text: text,
-                sender: auth.currentUser.displayName || auth.currentUser.email.split('@')[0],
-                email: auth.currentUser.email,
-                createdAt: serverTimestamp()
+                text, sender: auth.currentUser.displayName || auth.currentUser.email.split('@')[0],
+                uid: auth.currentUser.uid, createdAt: serverTimestamp()
             });
         };
 
         function loadMessages() {
-            const q = query(collection(db, "messages"), orderBy("createdAt", "asc"));
-            onSnapshot(q, (snapshot) => {
-                const container = document.getElementById('messages');
-                container.innerHTML = '';
-                snapshot.forEach(doc => {
+            onSnapshot(query(collection(db, "messages"), orderBy("createdAt", "asc")), s => {
+                const cont = document.getElementById('messages');
+                cont.innerHTML = '';
+                s.forEach(doc => {
                     const d = doc.data();
-                    const isMe = d.email === auth.currentUser.email;
-                    const time = d.createdAt ? d.createdAt.toDate().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) : '';
                     const div = document.createElement('div');
-                    div.className = `msg-card ${isMe ? 'msg-out' : 'msg-in'} mb-1`;
+                    div.className = "flex gap-4 group hover:bg-[#2e3035] -mx-4 px-4 py-1";
                     div.innerHTML = `
-                        ${!isMe ? `<div class="text-[10px] font-bold text-orange-400 mb-0.5">${d.sender}</div>` : ''}
-                        <div class="flex items-end gap-3 justify-between">
-                            <span class="break-words">${d.text}</span>
-                            <span class="text-[9px] opacity-30">${time}</span>
+                        <div class="w-10 h-10 rounded-full bg-gray-500 mt-1 flex items-center justify-center font-bold uppercase">${d.sender[0]}</div>
+                        <div>
+                            <span class="font-bold text-white hover:underline cursor-pointer mr-2">${d.sender}</span>
+                            <span class="text-[10px] text-gray-400 font-medium">${d.createdAt?.toDate().toLocaleTimeString() || ''}</span>
+                            <div class="text-[#dbdee1] leading-tight">${d.text}</div>
                         </div>`;
-                    container.appendChild(div);
+                    cont.appendChild(div);
                 });
-                container.scrollTop = container.scrollHeight;
+                cont.scrollTop = cont.scrollHeight;
+            });
+        }
+
+        function loadUsers() {
+            onSnapshot(collection(db, "presence"), s => {
+                const list = document.getElementById('userList');
+                list.innerHTML = ''; let online = 0;
+                s.forEach(doc => {
+                    const u = doc.data();
+                    if(u.status === "online") {
+                        online++;
+                        const div = document.createElement('div');
+                        div.className = "flex items-center gap-2.5 p-1.5 hover:bg-white/5 rounded cursor-pointer group";
+                        div.innerHTML = `<div class="relative"><div class="w-8 h-8 rounded-full bg-indigo-500 flex items-center justify-center text-xs font-bold uppercase">${u.name[0]}</div><div class="user-dot"></div></div>
+                                         <span class="text-sm text-gray-400 group-hover:text-white font-medium">${u.name}</span>`;
+                        list.appendChild(div);
+                    }
+                });
+                document.getElementById('onlineCount').innerText = online;
             });
         }
     </script>
