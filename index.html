@@ -3,69 +3,72 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>TG Premium + Profile</title>
+    <title>TG Premium Pro</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap');
         body { background-color: #0e1621; color: white; font-family: 'Inter', sans-serif; height: 100vh; overflow: hidden; }
-        .chat-wallpaper {
-            background: #0e1621 url('https://i.pinimg.com/originals/ab/ab/60/abab600f6ab38f13b65d8c3924ad5ca1.jpg') center/cover;
-            position: relative;
-        }
-        .chat-wallpaper::before { content: ""; position: absolute; inset: 0; background: rgba(14, 22, 33, 0.9); }
+        .chat-wallpaper { background: #0e1621 url('https://i.pinimg.com/originals/ab/ab/60/abab600f6ab38f13b65d8c3924ad5ca1.jpg') center/cover; position: relative; }
+        .chat-wallpaper::before { content: ""; position: absolute; inset: 0; background: rgba(14, 22, 33, 0.92); }
         .glass { background: rgba(23, 33, 43, 0.95); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(255,255,255,0.05); }
-        .msg-card { max-width: 85%; padding: 8px 12px; border-radius: 18px; position: relative; font-size: 15px; animation: slideUp 0.2s ease-out; }
+        .msg-card { max-width: 85%; padding: 8px 12px; border-radius: 18px; font-size: 15px; position: relative; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
         .msg-in { background: #182533; align-self: flex-start; border-bottom-left-radius: 4px; }
         .msg-out { background: #2b5278; align-self: flex-end; border-bottom-right-radius: 4px; }
-        @keyframes slideUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         .hidden { display: none !important; }
-        .modal { background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); }
+        .modal-bg { background: rgba(0,0,0,0.8); backdrop-filter: blur(8px); }
     </style>
 </head>
 <body class="flex flex-col">
 
-    <div id="authScreen" class="flex-1 flex items-center justify-center p-6 z-50">
+    <div id="authScreen" class="flex-1 flex items-center justify-center p-6 z-50 bg-[#0e1621]">
         <div class="bg-[#17212b] p-8 rounded-[32px] w-full max-w-[380px] shadow-2xl border border-white/5 text-center">
-            <div class="text-5xl mb-4">✈️</div>
-            <h1 class="text-2xl font-bold mb-6">Telegram Clone</h1>
-            <input type="email" id="email" placeholder="Email" class="w-full bg-[#0e1621] p-4 rounded-2xl mb-3 outline-none border border-white/10 focus:border-blue-500">
-            <input type="password" id="password" placeholder="Пароль" class="w-full bg-[#0e1621] p-4 rounded-2xl mb-6 outline-none border border-white/10 focus:border-blue-500">
-            <button id="loginBtn" class="w-full bg-blue-500 py-4 rounded-2xl font-bold mb-4 hover:bg-blue-600 transition">Войти</button>
+            <div class="text-5xl mb-4">✨</div>
+            <h1 class="text-2xl font-bold mb-6">Вход в систему</h1>
+            <input type="email" id="email" placeholder="Email" class="w-full bg-[#0e1621] p-4 rounded-2xl mb-3 outline-none border border-white/10 focus:border-blue-500 transition">
+            <input type="password" id="password" placeholder="Пароль" class="w-full bg-[#0e1621] p-4 rounded-2xl mb-6 outline-none border border-white/10 focus:border-blue-500 transition">
+            <button id="loginBtn" class="w-full bg-blue-500 py-4 rounded-2xl font-bold mb-4 shadow-lg hover:bg-blue-600 transition">Войти</button>
             <button id="regBtn" class="text-blue-400 text-sm hover:underline">Создать аккаунт</button>
-            <p id="authStatus" class="text-orange-400 text-[11px] mt-4"></p>
         </div>
     </div>
 
-    <div id="profileModal" class="hidden fixed inset-0 modal z-[100] flex items-center justify-center p-6">
-        <div class="bg-[#17212b] p-8 rounded-[32px] w-full max-w-[340px] border border-white/10 shadow-2xl">
-            <h2 class="text-xl font-bold mb-4 text-center">Ваш профиль</h2>
-            <p class="text-[11px] text-gray-400 mb-2 uppercase font-bold">Ваше имя в чате:</p>
-            <input type="text" id="userNameInput" placeholder="Введите имя..." class="w-full bg-[#0e1621] p-4 rounded-2xl mb-6 outline-none border border-white/10 focus:border-blue-500">
+    <div id="profileModal" class="hidden fixed inset-0 modal-bg z-[100] flex items-center justify-center p-6">
+        <div class="bg-[#17212b] p-8 rounded-[32px] w-full max-w-[340px] border border-white/10 shadow-2xl text-center">
+            <h2 class="text-xl font-bold mb-6">Ваш Профиль</h2>
+            <div class="w-20 h-20 bg-blue-500 rounded-full mx-auto mb-4 flex items-center justify-center text-3xl font-bold shadow-lg" id="profileAvatar">?</div>
+            <p class="text-[10px] text-gray-500 uppercase font-bold mb-2">Изменить имя:</p>
+            <input type="text" id="userNameInput" placeholder="Ваше имя..." class="w-full bg-[#0e1621] p-4 rounded-2xl mb-6 outline-none border border-white/10 focus:border-blue-500">
             <div class="flex gap-2">
-                <button id="saveProfileBtn" class="flex-1 bg-blue-500 py-3 rounded-xl font-bold text-sm">Сохранить</button>
-                <button id="closeProfileBtn" class="flex-1 bg-gray-700 py-3 rounded-xl font-bold text-sm">Закрыть</button>
+                <button id="saveProfileBtn" class="flex-1 bg-blue-500 py-3 rounded-xl font-bold text-sm">ОК</button>
+                <button id="closeProfileBtn" class="flex-1 bg-gray-700 py-3 rounded-xl font-bold text-sm text-gray-300">Отмена</button>
             </div>
         </div>
     </div>
 
     <div id="chatScreen" class="hidden flex-1 flex flex-col overflow-hidden">
+        <div id="verifyWarning" class="hidden bg-orange-500/20 border-b border-orange-500/30 px-4 py-2 text-[11px] text-orange-300 text-center flex justify-between items-center">
+            <span>Почта не подтверждена! Проверьте спам.</span>
+            <button id="resendBtn" class="bg-orange-500 text-white px-2 py-1 rounded font-bold">Выслать еще раз</button>
+        </div>
+
         <header class="glass px-5 py-3 flex justify-between items-center z-20">
             <div class="flex items-center gap-3">
-                <div id="openProfileBtn" class="w-10 h-10 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center font-bold cursor-pointer hover:scale-105 transition">?</div>
+                <div id="openProfileBtn" class="w-10 h-10 bg-gradient-to-br from-indigo-500 to-blue-600 rounded-full flex items-center justify-center font-bold cursor-pointer hover:scale-105 transition shadow-lg">?</div>
                 <div>
                     <h2 id="displayUserName" class="font-bold text-[14px]">Загрузка...</h2>
-                    <p class="text-[10px] text-green-400">в сети</p>
+                    <p class="text-[10px] text-green-400">онлайн</p>
                 </div>
             </div>
-            <button id="logoutBtn" class="text-gray-400 text-xs hover:text-red-400">Выход</button>
+            <button id="logoutBtn" class="text-gray-500 text-xs hover:text-red-400 transition">Выход</button>
         </header>
 
         <div id="messages" class="flex-1 chat-wallpaper p-4 flex flex-col gap-2 overflow-y-auto z-10"></div>
 
         <footer class="glass p-3 z-20">
             <form id="msgForm" class="max-w-4xl mx-auto flex gap-3">
-                <input type="text" id="msgInput" placeholder="Написать сообщение..." class="flex-1 bg-[#242f3d]/80 p-3 rounded-2xl outline-none text-sm border border-white/5">
-                <button type="submit" class="bg-blue-500 w-12 h-12 rounded-full flex items-center justify-center shadow-lg"><svg viewBox="0 0 24 24" width="22" height="22" fill="white"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg></button>
+                <input type="text" id="msgInput" placeholder="Написать сообщение..." autocomplete="off" class="flex-1 bg-[#242f3d]/80 p-3 rounded-2xl outline-none text-sm border border-white/5 focus:border-blue-500 transition">
+                <button type="submit" class="bg-blue-500 w-12 h-12 rounded-full flex items-center justify-center shadow-lg hover:scale-105 active:scale-90 transition shadow-blue-500/30">
+                    <svg viewBox="0 0 24 24" width="22" height="22" fill="white"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+                </button>
             </form>
         </footer>
     </div>
@@ -89,57 +92,58 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // --- ЛОГИКА АВТОРИЗАЦИИ ---
+        // --- AUTH LOGIC ---
         document.getElementById('regBtn').onclick = async () => {
             const e = document.getElementById('email').value, p = document.getElementById('password').value;
             try {
                 const res = await createUserWithEmailAndPassword(auth, e, p);
                 await sendEmailVerification(res.user);
-                alert("Письмо для подтверждения отправлено на почту! Проверьте папку Спам.");
+                alert("Аккаунт создан! Письмо отправлено.");
             } catch(err) { alert(err.message); }
         };
 
-        document.getElementById('loginBtn').onclick = async () => {
+        document.getElementById('loginBtn').onclick = () => {
             const e = document.getElementById('email').value, p = document.getElementById('password').value;
-            try {
-                const res = await signInWithEmailAndPassword(auth, e, p);
-                if(!res.user.emailVerified) {
-                    alert("Пожалуйста, подтвердите вашу почту перед входом!");
-                    signOut(auth);
-                }
-            } catch(err) { alert("Ошибка входа"); }
+            signInWithEmailAndPassword(auth, e, p).catch(() => alert("Ошибка входа"));
         };
 
         document.getElementById('logoutBtn').onclick = () => signOut(auth);
+        document.getElementById('resendBtn').onclick = () => {
+            sendEmailVerification(auth.currentUser).then(() => alert("Письмо отправлено повторно!"));
+        };
 
-        // --- ЛОГИКА ПРОФИЛЯ ---
+        // --- PROFILE LOGIC ---
         const profileModal = document.getElementById('profileModal');
         document.getElementById('openProfileBtn').onclick = () => profileModal.classList.remove('hidden');
         document.getElementById('closeProfileBtn').onclick = () => profileModal.classList.add('hidden');
         
         document.getElementById('saveProfileBtn').onclick = async () => {
-            const newName = document.getElementById('userNameInput').value;
-            if(newName.length < 2) return alert("Слишком короткое имя");
-            await updateProfile(auth.currentUser, { displayName: newName });
-            document.getElementById('displayUserName').innerText = newName;
+            const name = document.getElementById('userNameInput').value.trim();
+            if(name.length < 2) return;
+            await updateProfile(auth.currentUser, { displayName: name });
             profileModal.classList.add('hidden');
-            alert("Имя обновлено!");
+            updateUI(auth.currentUser);
         };
 
-        // --- СОСТОЯНИЕ ПОЛЬЗОВАТЕЛЯ ---
+        // --- OBSERVER ---
         onAuthStateChanged(auth, user => {
-            const isLogged = user && user.emailVerified;
-            document.getElementById('authScreen').classList.toggle('hidden', isLogged);
-            document.getElementById('chatScreen').classList.toggle('hidden', !isLogged);
-            
-            if(isLogged) {
-                document.getElementById('displayUserName').innerText = user.displayName || user.email.split('@')[0];
-                document.getElementById('openProfileBtn').innerText = (user.displayName || user.email)[0].toUpperCase();
+            document.getElementById('authScreen').classList.toggle('hidden', !!user);
+            document.getElementById('chatScreen').classList.toggle('hidden', !user);
+            if(user) {
+                updateUI(user);
                 loadMessages();
             }
         });
 
-        // --- ЧАТ ---
+        function updateUI(user) {
+            const name = user.displayName || user.email.split('@')[0];
+            document.getElementById('displayUserName').innerText = name;
+            document.getElementById('openProfileBtn').innerText = name[0].toUpperCase();
+            document.getElementById('profileAvatar').innerText = name[0].toUpperCase();
+            document.getElementById('verifyWarning').classList.toggle('hidden', user.emailVerified);
+        }
+
+        // --- CHAT LOGIC ---
         document.getElementById('msgForm').onsubmit = async (e) => {
             e.preventDefault();
             const input = document.getElementById('msgInput');
@@ -148,8 +152,8 @@
             input.value = '';
             await addDoc(collection(db, "messages"), {
                 text: text,
-                senderName: auth.currentUser.displayName || auth.currentUser.email.split('@')[0],
-                senderEmail: auth.currentUser.email,
+                sender: auth.currentUser.displayName || auth.currentUser.email.split('@')[0],
+                email: auth.currentUser.email,
                 createdAt: serverTimestamp()
             });
         };
@@ -161,16 +165,15 @@
                 container.innerHTML = '';
                 snapshot.forEach(doc => {
                     const d = doc.data();
-                    const isMe = d.senderEmail === auth.currentUser.email;
-                    const time = d.createdAt ? d.createdAt.toDate().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) : '...';
-                    
+                    const isMe = d.email === auth.currentUser.email;
+                    const time = d.createdAt ? d.createdAt.toDate().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) : '';
                     const div = document.createElement('div');
-                    div.className = `msg-card ${isMe ? 'msg-out' : 'msg-in'}`;
+                    div.className = `msg-card ${isMe ? 'msg-out' : 'msg-in'} mb-1`;
                     div.innerHTML = `
-                        ${!isMe ? `<div class="text-[10px] font-bold text-orange-400 mb-0.5">${d.senderName}</div>` : ''}
-                        <div class="flex items-end gap-3">
-                            <span>${d.text}</span>
-                            <span class="text-[9px] text-white/30">${time}</span>
+                        ${!isMe ? `<div class="text-[10px] font-bold text-orange-400 mb-0.5">${d.sender}</div>` : ''}
+                        <div class="flex items-end gap-3 justify-between">
+                            <span class="break-words">${d.text}</span>
+                            <span class="text-[9px] opacity-30">${time}</span>
                         </div>`;
                     container.appendChild(div);
                 });
