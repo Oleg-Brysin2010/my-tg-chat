@@ -2,58 +2,56 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TG Clone: Roskamnadzor</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Roskamnadzor Chat</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { background-color: #0e1621; color: white; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+        body { background-color: #0e1621; color: white; font-family: -apple-system, system-ui, Roboto, sans-serif; }
         .chat-bg { 
             background-color: #0e1621; 
             background-image: url('https://www.transparenttextures.com/patterns/carbon-fibre.png');
+            background-attachment: fixed;
         }
-        .msg { max-width: 80%; padding: 8px 15px; border-radius: 15px; margin-bottom: 8px; font-size: 15px; position: relative; line-height: 1.4; }
-        .msg-in { background: #182533; align-self: flex-start; border-radius: 15px 15px 15px 5px; border: 1px solid #232e3c; }
-        .msg-out { background: #2b5278; align-self: flex-end; border-radius: 15px 15px 5px 15px; }
+        /* Стиль облачков как в ТГ */
+        .msg { max-width: 80%; padding: 8px 12px; border-radius: 12px; margin-bottom: 6px; font-size: 15px; position: relative; box-shadow: 0 1px 2px rgba(0,0,0,0.4); }
+        .msg-in { background: #182533; align-self: flex-start; border-radius: 12px 12px 12px 4px; }
+        .msg-out { background: #2b5278; align-self: flex-end; border-radius: 12px 12px 4px 12px; }
         .hidden { display: none !important; }
-        ::-webkit-scrollbar { width: 5px; }
-        ::-webkit-scrollbar-thumb { background: #242f3d; border-radius: 10px; }
+        input::placeholder { color: #708499; }
     </style>
 </head>
 <body class="h-screen flex flex-col overflow-hidden">
 
-    <div id="authScreen" class="flex-1 flex items-center justify-center p-4">
-        <div class="bg-[#17212b] p-8 rounded-2xl w-full max-w-[360px] shadow-2xl text-center">
-            <div class="mb-6 flex justify-center">
-                <div class="w-20 h-20 bg-blue-500 rounded-full flex items-center justify-center text-3xl shadow-lg">🚀</div>
-            </div>
-            <h1 class="text-xl font-bold mb-6">Войти в мессенджер</h1>
-            <input type="email" id="email" placeholder="Эл. почта" class="w-full p-3 mb-3 rounded-lg bg-[#242f3d] outline-none border border-gray-700 focus:border-blue-500 text-sm">
-            <input type="password" id="password" placeholder="Пароль" class="w-full p-3 mb-6 rounded-lg bg-[#242f3d] outline-none border border-gray-700 focus:border-blue-500 text-sm">
-            <button onclick="login()" class="w-full bg-blue-500 py-3 rounded-lg font-bold mb-4 hover:bg-blue-600 transition shadow-lg">ВОЙТИ</button>
-            <button onclick="register()" class="text-blue-400 text-sm hover:underline">Создать аккаунт</button>
+    <div id="authScreen" class="flex-1 flex items-center justify-center p-6">
+        <div class="bg-[#17212b] p-8 rounded-3xl w-full max-w-[360px] shadow-2xl text-center border border-white/5">
+            <div class="text-5xl mb-4">💬</div>
+            <h1 class="text-2xl font-bold mb-6">Вход в Чат</h1>
+            <input type="email" id="email" placeholder="Почта" class="w-full p-3 mb-3 rounded-xl bg-[#242f3d] outline-none border border-transparent focus:border-blue-500 transition">
+            <input type="password" id="password" placeholder="Пароль" class="w-full p-3 mb-6 rounded-xl bg-[#242f3d] outline-none border border-transparent focus:border-blue-500 transition">
+            <button id="loginBtn" class="w-full bg-blue-500 py-3 rounded-xl font-bold hover:bg-blue-600 transition shadow-lg mb-4">ВОЙТИ</button>
+            <button id="regBtn" class="text-blue-400 text-sm hover:underline">Создать аккаунт</button>
         </div>
     </div>
 
     <div id="chatScreen" class="hidden flex-1 flex flex-col overflow-hidden">
-        <header class="bg-[#17212b] p-3 flex justify-between items-center shadow-md border-b border-black/20">
+        <header class="bg-[#17212b] p-3 flex justify-between items-center shadow-lg z-10">
             <div class="flex items-center gap-3">
-                <div class="w-10 h-10 bg-gradient-to-tr from-blue-600 to-blue-400 rounded-full flex items-center justify-center font-bold">R</div>
+                <div class="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center font-bold">R</div>
                 <div>
                     <b class="block text-sm">Общий чат</b>
-                    <small id="userLabel" class="text-gray-400 text-[10px]"></small>
+                    <small id="userLabel" class="text-blue-400 text-[10px]"></small>
                 </div>
             </div>
-            <button onclick="logout()" class="text-gray-400 hover:text-red-400 p-2 transition">Выход</button>
+            <button id="logoutBtn" class="text-gray-400 text-sm hover:text-red-400">Выход</button>
         </header>
 
-        <div id="messages" class="flex-1 chat-bg p-4 flex flex-col overflow-y-auto">
-            </div>
+        <div id="messages" class="flex-1 chat-bg p-4 flex flex-col overflow-y-auto"></div>
 
-        <form onsubmit="sendMessage(event)" class="p-3 bg-[#17212b] flex gap-2 items-center">
+        <form id="msgForm" class="p-3 bg-[#17212b] flex gap-2 items-end">
             <input type="text" id="msgInput" placeholder="Написать сообщение..." autocomplete="off" 
-                   class="flex-1 bg-[#0e1621] p-3 rounded-full outline-none px-5 text-sm focus:ring-1 focus:ring-blue-500 transition">
-            <button type="submit" class="bg-blue-500 w-11 h-11 rounded-full flex items-center justify-center hover:scale-105 transition shadow-lg">
-                <svg viewBox="0 0 24 24" width="20" height="20" fill="white"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+                   class="flex-1 bg-[#242f3d] p-3 rounded-2xl outline-none px-4 text-sm focus:ring-1 focus:ring-blue-500">
+            <button type="submit" class="bg-blue-500 w-11 h-11 rounded-full flex items-center justify-center shadow-lg hover:scale-105 active:scale-95 transition">
+                <svg viewBox="0 0 24 24" width="22" height="22" fill="white"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
             </button>
         </form>
     </div>
@@ -63,7 +61,7 @@
         import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
         import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        // Твои настройки уже здесь
+        // ТВОИ КЛЮЧИ (НЕ МЕНЯЙ, ОНИ УЖЕ ТВОИ)
         const firebaseConfig = {
             apiKey: "AIzaSyCiduYZfuWiAoJOuTuhmdDRbPWlpL1jmw4",
             authDomain: "telegram-clone-roskamnadzor.firebaseapp.com",
@@ -78,29 +76,32 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // Функции
-        window.register = () => {
+        // Кнопки и логика
+        const btnLogin = document.getElementById('loginBtn');
+        const btnReg = document.getElementById('regBtn');
+        const btnLogout = document.getElementById('logoutBtn');
+        const msgForm = document.getElementById('msgForm');
+
+        btnReg.onclick = () => {
             const e = document.getElementById('email').value, p = document.getElementById('password').value;
-            if(p.length < 6) return alert("Пароль должен быть от 6 символов!");
             createUserWithEmailAndPassword(auth, e, p).catch(err => alert("Ошибка: " + err.message));
         };
 
-        window.login = () => {
+        btnLogin.onclick = () => {
             const e = document.getElementById('email').value, p = document.getElementById('password').value;
-            signInWithEmailAndPassword(auth, e, p).catch(err => alert("Неверный логин или пароль"));
+            signInWithEmailAndPassword(auth, e, p).catch(err => alert("Ошибка входа"));
         };
 
-        window.logout = () => signOut(auth);
+        btnLogout.onclick = () => signOut(auth);
 
-        window.sendMessage = async (e) => {
+        msgForm.onsubmit = async (e) => {
             e.preventDefault();
             const input = document.getElementById('msgInput');
-            const val = input.value.trim();
-            if(!val) return;
-            
+            if(!input.value.trim()) return;
+            const text = input.value;
             input.value = '';
             await addDoc(collection(db, "messages"), {
-                text: val,
+                text: text,
                 sender: auth.currentUser.email,
                 createdAt: serverTimestamp()
             });
@@ -125,15 +126,15 @@
                     const isMe = d.sender === auth.currentUser.email;
                     const time = d.createdAt ? d.createdAt.toDate().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) : '';
                     
-                    const msgDiv = document.createElement('div');
-                    msgDiv.className = `msg ${isMe ? 'msg-out' : 'msg-in'}`;
-                    msgDiv.innerHTML = `
-                        ${!isMe ? `<div class="text-[10px] text-blue-400 font-bold mb-1">${d.sender.split('@')[0]}</div>` : ''}
-                        <div class="flex items-end gap-2">
-                            <span class="break-words">${d.text}</span>
-                            <span class="text-[9px] text-gray-400 min-w-[30px] text-right">${time}</span>
+                    const div = document.createElement('div');
+                    div.className = `msg ${isMe ? 'msg-out' : 'msg-in'}`;
+                    div.innerHTML = `
+                        ${!isMe ? `<div style="color:#4da3ff; font-size:10px; font-weight:bold; margin-bottom:2px;">${d.sender.split('@')[0]}</div>` : ''}
+                        <div style="display:flex; align-items:flex-end; gap:10px; justify-content:space-between;">
+                            <span style="word-break:break-word;">${d.text}</span>
+                            <span style="font-size:9px; color:#8596a5; min-width:30px; text-right">${time}</span>
                         </div>`;
-                    container.appendChild(msgDiv);
+                    container.appendChild(div);
                 });
                 container.scrollTop = container.scrollHeight;
             });
