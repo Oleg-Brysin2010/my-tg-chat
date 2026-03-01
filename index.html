@@ -2,222 +2,67 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Discord Clone v2</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#1e1f22">
+    <title>Discord Clone</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=GG+Sans:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-        
-        body { 
-            background-color: #313338; 
-            color: #f2f3f5; 
-            font-family: 'Inter', sans-serif;
-            height: 100vh; overflow: hidden;
+        /* 2. УБИВАЕМ ВСЕ СТАНДАРТНЫЕ СТИЛИ БРАУЗЕРА */
+        * {
+            margin: 0; padding: 0; box-sizing: border-box;
+            font-family: 'GG Sans', 'Inter', sans-serif;
+            -webkit-font-smoothing: antialiased; /* Сглаживание шрифтов в Chrome */
+            -webkit-tap-highlight-color: transparent; /* Убираем синий блик при клике */
+            outline: none !important; /* Убираем синие рамки */
         }
 
-        /* Цвета Discord */
-        .bg-sidebar { background-color: #2b2d31; }
-        .bg-chat { background-color: #313338; }
-        .bg-dark { background-color: #1e1f22; }
+        html, body {
+            height: 100dvh; /* Динамическая высота (игнорирует полоски Chrome) */
+            background-color: #313338;
+            overflow: hidden;
+            position: fixed; /* Запрещает "резиновый" скролл в Google */
+            width: 100%;
+        }
+
+        /* 3. ИСПРАВЛЯЕМ ЖЕЛТЫЕ ПОЛЯ (AUTOFILL) В CHROME */
+        input:-webkit-autofill {
+            -webkit-box-shadow: 0 0 0px 1000px #1e1f22 inset !important;
+            -webkit-text-fill-color: white !important;
+        }
+
+        /* 4. ДЕЛАЕМ СКРОЛЛБАР КАК В DISCORD (Chrome поддерживает только webkit) */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #2b2d31; }
+        ::-webkit-scrollbar-thumb { background: #1a1b1e; border-radius: 4px; }
+
         .discord-blurple { background-color: #5865f2; }
-        
-        /* Скроллбар */
-        #messages::-webkit-scrollbar { width: 8px; }
-        #messages::-webkit-scrollbar-thumb { background: #1a1b1e; border-radius: 4px; }
-
-        .user-dot {
-            position: absolute; bottom: -2px; right: -2px;
-            width: 14px; height: 14px; background: #23a55a;
-            border: 3px solid #232428; border-radius: 50%;
-        }
-        .hidden { display: none !important; }
+        .bg-sidebar { background-color: #2b2d31; }
+        .bg-tertiary { background-color: #1e1f22; }
     </style>
 </head>
-<body class="flex">
+<body class="flex text-[#f2f3f5]">
 
-    <div id="authScreen" class="fixed inset-0 z-[100] bg-[#5865f2] flex items-center justify-center p-4">
+    <div id="authScreen" class="fixed inset-0 z-[100] bg-[#313338] md:bg-[#5865f2] flex items-center justify-center p-4">
         <div class="bg-[#313338] p-8 rounded-lg shadow-2xl w-full max-w-[420px]">
-            <h1 class="text-2xl font-bold text-center mb-6">С возвращением!</h1>
-            <div class="mb-4">
-                <label class="block text-xs font-bold text-[#b5bac1] uppercase mb-2">Электронная почта</label>
-                <input type="email" id="email" class="w-full bg-[#1e1f22] p-2.5 rounded outline-none border border-transparent focus:border-[#00a8fc]">
-            </div>
-            <div class="mb-6">
-                <label class="block text-xs font-bold text-[#b5bac1] uppercase mb-2">Пароль</label>
-                <input type="password" id="password" class="w-full bg-[#1e1f22] p-2.5 rounded outline-none border border-transparent focus:border-[#00a8fc]">
-            </div>
-            <button id="loginBtn" class="w-full discord-blurple py-3 rounded font-medium hover:bg-[#4752c4] transition mb-3">Вход</button>
-            <button id="regBtn" class="text-sm text-[#00a8fc] hover:underline">Зарегистрироваться</button>
-        </div>
-    </div>
-
-    <aside class="w-64 bg-sidebar flex flex-col shrink-0 hidden md:flex">
-        <div class="h-12 border-b border-[#1e1f22] flex items-center px-4 font-bold shadow-sm">Чат Сервер</div>
-        <div class="flex-1 p-2">
-            <div class="bg-[#3f4147] text-white px-2 py-1.5 rounded flex items-center gap-2 mb-1">
-                <span class="text-gray-400 text-xl">#</span> основной
-            </div>
-        </div>
-        <div class="bg-[#232428] p-2 flex items-center gap-2">
-            <div class="relative">
-                <div id="myAvatar" class="w-8 h-8 rounded-full bg-indigo-500 flex items-center justify-center font-bold text-xs uppercase">?</div>
-                <div class="user-dot"></div>
-            </div>
-            <div class="flex-1 overflow-hidden">
-                <div id="myName" class="text-sm font-bold truncate">User</div>
-                <div class="text-[10px] text-gray-400">В сети</div>
-            </div>
-            <button id="openProfileBtn" class="hover:bg-white/10 p-1.5 rounded text-gray-400">⚙️</button>
-        </div>
-    </aside>
-
-    <main class="flex-1 flex flex-col min-w-0 bg-chat">
-        <header class="h-12 border-b border-[#1e1f22] flex items-center px-4 gap-2 shadow-sm">
-            <span class="text-gray-400 text-2xl">#</span>
-            <span class="font-bold">основной</span>
-        </header>
-        
-        <div id="messages" class="flex-1 overflow-y-auto p-4 space-y-4"></div>
-
-        <form id="msgForm" class="p-4">
-            <div class="bg-[#383a40] rounded-lg px-4 py-2.5 flex items-center">
-                <input type="text" id="msgInput" placeholder="Написать в #основной" autocomplete="off" class="w-full bg-transparent outline-none text-[15px]">
-            </div>
-        </form>
-    </main>
-
-    <aside class="w-60 bg-sidebar p-4 hidden lg:block shrink-0">
-        <h3 class="text-xs font-bold text-[#949ba4] uppercase mb-4 tracking-wider">В сети — <span id="onlineCount">0</span></h3>
-        <div id="userList" class="space-y-1"></div>
-    </aside>
-
-    <div id="profileModal" class="hidden fixed inset-0 z-[200] bg-black/80 flex items-center justify-center p-4">
-        <div class="bg-chat rounded-lg w-full max-w-[340px] overflow-hidden shadow-2xl">
-            <div class="h-12 discord-blurple"></div>
-            <div class="p-6">
-                <h2 class="text-xl font-bold mb-4">Настройки аккаунта</h2>
-                <input type="text" id="userNameInput" placeholder="Ваш новый ник" class="w-full bg-dark p-3 rounded mb-6 outline-none border border-transparent focus:border-blue-500">
-                <div class="flex gap-2">
-                    <button id="saveProfileBtn" class="flex-1 bg-green-600 py-2 rounded font-bold hover:bg-green-700">Сохранить</button>
-                    <button id="closeProfileBtn" class="flex-1 bg-gray-600 py-2 rounded font-bold hover:bg-gray-700">Отмена</button>
+            <h1 class="text-2xl font-bold text-center mb-2">С возвращением!</h1>
+            <p class="text-[#b5bac1] text-center mb-6 text-sm">Мы так рады видеть вас снова!</p>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-[11px] font-bold text-[#b5bac1] uppercase mb-2 tracking-wide">Email</label>
+                    <input type="email" id="email" class="w-full bg-tertiary p-3 rounded text-white border-none focus:ring-1 focus:ring-[#5865f2]">
                 </div>
-                <button id="logoutBtn" class="w-full mt-4 text-red-400 text-xs">Выйти из системы</button>
+                <div>
+                    <label class="block text-[11px] font-bold text-[#b5bac1] uppercase mb-2 tracking-wide">Пароль</label>
+                    <input type="password" id="password" class="w-full bg-tertiary p-3 rounded text-white border-none">
+                </div>
+                <button id="loginBtn" class="w-full discord-blurple py-3 rounded font-bold hover:bg-[#4752c4] transition active:scale-[0.98]">Вход</button>
+                <button id="regBtn" class="text-sm text-[#00a8fc] hover:underline">Зарегистрироваться</button>
             </div>
         </div>
     </div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, updateProfile } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, setDoc, doc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-
-        const firebaseConfig = {
-            apiKey: "AIzaSyCiduYZfuWiAoJOuTuhmdDRbPWlpL1jmw4",
-            authDomain: "telegram-clone-roskamnadzor.firebaseapp.com",
-            projectId: "telegram-clone-roskamnadzor",
-            storageBucket: "telegram-clone-roskamnadzor.firebasestorage.app",
-            messagingSenderId: "935106885464",
-            appId: "1:935106885464:web:308629db74f952bea3172d",
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-
-        async function updatePresence(user, status) {
-            if (!user) return;
-            await setDoc(doc(db, "presence", user.uid), {
-                name: user.displayName || user.email.split('@')[0],
-                status: status
-            }, { merge: true });
-        }
-
-        document.getElementById('regBtn').onclick = () => {
-            const e = document.getElementById('email').value, p = document.getElementById('password').value;
-            createUserWithEmailAndPassword(auth, e, p).catch(err => alert(err.message));
-        };
-        document.getElementById('loginBtn').onclick = () => {
-            const e = document.getElementById('email').value, p = document.getElementById('password').value;
-            signInWithEmailAndPassword(auth, e, p).catch(() => alert("Ошибка входа"));
-        };
-        document.getElementById('logoutBtn').onclick = async () => {
-            await updatePresence(auth.currentUser, "offline");
-            signOut(auth).then(() => location.reload());
-        };
-
-        document.getElementById('openProfileBtn').onclick = () => document.getElementById('profileModal').classList.remove('hidden');
-        document.getElementById('closeProfileBtn').onclick = () => document.getElementById('profileModal').classList.add('hidden');
-        document.getElementById('saveProfileBtn').onclick = async () => {
-            const n = document.getElementById('userNameInput').value.trim();
-            if(n) {
-                await updateProfile(auth.currentUser, { displayName: n });
-                await updatePresence(auth.currentUser, "online");
-                location.reload();
-            }
-        };
-
-        onAuthStateChanged(auth, user => {
-            document.getElementById('authScreen').classList.toggle('hidden', !!user);
-            if(user) {
-                const name = user.displayName || user.email.split('@')[0];
-                document.getElementById('myName').innerText = name;
-                document.getElementById('myAvatar').innerText = name[0];
-                updatePresence(user, "online");
-                loadMessages();
-                loadUsers();
-            }
-        });
-
-        document.getElementById('msgForm').onsubmit = async (e) => {
-            e.preventDefault();
-            const input = document.getElementById('msgInput');
-            if(!input.value.trim()) return;
-            const text = input.value; input.value = '';
-            await addDoc(collection(db, "messages"), {
-                text, sender: auth.currentUser.displayName || auth.currentUser.email.split('@')[0],
-                uid: auth.currentUser.uid, createdAt: serverTimestamp()
-            });
-        };
-
-        function loadMessages() {
-            onSnapshot(query(collection(db, "messages"), orderBy("createdAt", "asc")), s => {
-                const cont = document.getElementById('messages');
-                cont.innerHTML = '';
-                s.forEach(doc => {
-                    const d = doc.data();
-                    const div = document.createElement('div');
-                    div.className = "flex gap-4 group hover:bg-[#2e3035] -mx-4 px-4 py-1";
-                    div.innerHTML = `
-                        <div class="w-10 h-10 rounded-full bg-gray-500 mt-1 flex items-center justify-center font-bold uppercase">${d.sender[0]}</div>
-                        <div>
-                            <span class="font-bold text-white hover:underline cursor-pointer mr-2">${d.sender}</span>
-                            <span class="text-[10px] text-gray-400 font-medium">${d.createdAt?.toDate().toLocaleTimeString() || ''}</span>
-                            <div class="text-[#dbdee1] leading-tight">${d.text}</div>
-                        </div>`;
-                    cont.appendChild(div);
-                });
-                cont.scrollTop = cont.scrollHeight;
-            });
-        }
-
-        function loadUsers() {
-            onSnapshot(collection(db, "presence"), s => {
-                const list = document.getElementById('userList');
-                list.innerHTML = ''; let online = 0;
-                s.forEach(doc => {
-                    const u = doc.data();
-                    if(u.status === "online") {
-                        online++;
-                        const div = document.createElement('div');
-                        div.className = "flex items-center gap-2.5 p-1.5 hover:bg-white/5 rounded cursor-pointer group";
-                        div.innerHTML = `<div class="relative"><div class="w-8 h-8 rounded-full bg-indigo-500 flex items-center justify-center text-xs font-bold uppercase">${u.name[0]}</div><div class="user-dot"></div></div>
-                                         <span class="text-sm text-gray-400 group-hover:text-white font-medium">${u.name}</span>`;
-                        list.appendChild(div);
-                    }
-                });
-                document.getElementById('onlineCount').innerText = online;
-            });
-        }
-    </script>
-</body>
+    </body>
 </html>
