@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Discord Chat</title>
+    <style>
+        body { margin: 0; background: #313338; color: white; font-family: sans-serif; display: flex; flex-direction: column; height: 100vh; }
+        
+        /* Шапка */
+        .header { background: #2b2d31; padding: 15px; font-weight: bold; border-bottom: 1px solid #1e1f22; text-align: center; }
+        
+        /* Область сообщений */
+        .messages { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 10px; }
+        .msg { background: #383a40; padding: 10px; border-radius: 8px; max-width: 80%; }
+        .msg .user { color: #5865f2; font-size: 12px; font-weight: bold; margin-bottom: 4px; }
+
+        /* Поле ввода */
+        .input-area { background: #313338; padding: 20px; }
+        .input-wrapper { background: #383a40; border-radius: 8px; display: flex; padding: 10px; }
+        input { background: transparent; border: none; color: white; flex: 1; outline: none; font-size: 16px; }
+        button { background: #5865f2; border: none; color: white; padding: 8px 15px; border-radius: 4px; font-weight: bold; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+    <div class="header"># общий-чат</div>
+
+    <div class="messages" id="messages">
+        <div class="msg">
+            <div class="user">Система</div>
+            Добро пожаловать в чат!
+        </div>
+    </div>
+
+    <div class="input-area">
+        <div class="input-wrapper">
+            <input type="text" id="msgInput" placeholder="Написать в #общий-чат">
+            <button id="sendBtn">Отправить</button>
+        </div>
+    </div>
+
+    <script>
+        const sendBtn = document.getElementById('sendBtn');
+        const msgInput = document.getElementById('msgInput');
+        const messagesDiv = document.getElementById('messages');
+
+        sendBtn.onclick = () => {
+            if(!msgInput.value) return;
+            
+            const newMsg = document.createElement('div');
+            newMsg.className = 'msg';
+            newMsg.innerHTML = `<div class="user">Вы</div>${msgInput.value}`;
+            
+            messagesDiv.appendChild(newMsg);
+            msgInput.value = '';
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        };
+    </script>
+</body>
+</html>
