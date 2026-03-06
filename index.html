@@ -3,92 +3,78 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Discord Pro</title>
+    <title>Discord Clone Pro</title>
     <style>
-        :root { 
-            --bg: #313338; --card: #2b2d31; --input: #1e1f22; 
-            --blurple: #5865f2; --text: #f2f3f5; --muted: #b5bac1; 
-        }
-        
-        * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        :root { --bg: #313338; --card: #2b2d31; --input: #1e1f22; --blurple: #5865f2; --text: #f2f3f5; --muted: #b5bac1; }
+        * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, sans-serif; }
         body { background: var(--bg); color: var(--text); margin: 0; height: 100vh; display: flex; flex-direction: column; }
-
-        /* СКРОЛЛБАР */
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: var(--bg); }
-        ::-webkit-scrollbar-thumb { background: #1a1b1e; border-radius: 10px; }
 
         /* ВХОД */
         #authSection { display: flex; align-items: center; justify-content: center; flex: 1; padding: 20px; }
-        .auth-card { background: var(--card); padding: 32px; border-radius: 8px; width: 100%; max-width: 400px; box-shadow: 0 8px 16px rgba(0,0,0,0.3); }
-        h2 { margin: 0 0 8px; font-size: 24px; }
-        label { display: block; color: var(--muted); font-size: 12px; font-weight: bold; text-transform: uppercase; margin-top: 15px; }
-        
+        .auth-card { background: var(--card); padding: 32px; border-radius: 8px; width: 100%; max-width: 400px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.4); }
         input { width: 100%; padding: 12px; margin: 8px 0; border-radius: 4px; border: none; background: var(--input); color: white; outline: none; font-size: 16px; }
-        input:focus { box-shadow: 0 0 0 2px var(--blurple); }
-        
-        .btn { width: 100%; padding: 14px; background: var(--blurple); color: white; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; transition: 0.2s; font-size: 16px; }
-        .btn:active { background: #4752c4; transform: scale(0.98); }
+        .btn { width: 100%; padding: 14px; background: var(--blurple); color: white; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        .btn:hover { background: #4752c4; }
 
         /* ЧАТ */
         #chatSection { display: none; flex-direction: column; height: 100%; }
-        .chat-header { background: var(--card); padding: 15px; font-weight: bold; border-bottom: 1px solid #1e1f22; display: flex; justify-content: space-between; align-items: center; }
-        
+        .header { background: var(--card); padding: 15px; font-weight: bold; border-bottom: 1px solid #1e1f22; display: flex; justify-content: space-between; align-items: center; }
         #messages { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 15px; }
         
-        .msg-container { display: flex; flex-direction: column; max-width: 85%; }
+        .msg-container { display: flex; flex-direction: column; max-width: 85%; align-self: flex-start; }
         .msg-container.mine { align-self: flex-end; align-items: flex-end; }
+        .username { font-size: 12px; font-weight: bold; margin-bottom: 4px; color: #00a8fc; }
+        .mine .username { color: #fff; }
         
-        .msg-info { display: flex; gap: 8px; align-items: center; margin-bottom: 4px; font-size: 12px; }
-        .username { color: #ffffff; font-weight: bold; }
-        .timestamp { color: var(--muted); font-size: 10px; }
-        
-        .bubble { background: #383a40; padding: 12px; border-radius: 2px 15px 15px 15px; line-height: 1.4; position: relative; }
+        .bubble { background: #383a40; padding: 12px; border-radius: 2px 15px 15px 15px; line-height: 1.4; }
         .mine .bubble { background: var(--blurple); border-radius: 15px 15px 2px 15px; }
+        
+        .chat-img { max-width: 100%; border-radius: 8px; margin-top: 8px; display: block; cursor: pointer; border: 1px solid rgba(255,255,255,0.1); }
 
-        .input-area { padding: 20px; background: var(--bg); display: flex; gap: 12px; align-items: center; }
-        .input-wrapper { background: #383a40; flex: 1; border-radius: 8px; display: flex; align-items: center; padding: 2px 12px; }
-        #msgInput { background: transparent; margin: 0; }
+        /* ПАНЕЛЬ ВВОДА */
+        .input-area { padding: 15px; background: var(--bg); display: flex; gap: 12px; align-items: center; border-top: 1px solid #2b2d31; }
+        .input-wrapper { flex: 1; background: #383a40; border-radius: 8px; display: flex; align-items: center; padding: 0 10px; }
+        #msgInput { background: transparent; margin: 0; flex: 1; }
+        
+        .attach-btn { cursor: pointer; font-size: 22px; padding: 5px; opacity: 0.7; transition: 0.2s; }
+        .attach-btn:hover { opacity: 1; transform: scale(1.1); }
+        #fileInput { display: none; }
+        #status { font-size: 11px; color: var(--blurple); padding-left: 20px; height: 15px; font-style: italic; }
     </style>
 </head>
 <body>
 
     <div id="authSection">
         <div class="auth-card">
-            <h2>Добро пожаловать!</h2>
-            <p style="color: var(--muted); margin-bottom: 20px;">Заполни данные для входа</p>
-            
-            <label>Имя (Никнейм)</label>
-            <input type="text" id="nickname" placeholder="Например: Neo">
-            
-            <label>Email</label>
-            <input type="email" id="email" placeholder="email@example.com">
-            
-            <label>Пароль</label>
-            <input type="password" id="password">
-            
-            <button class="btn" id="loginBtn" style="margin-top:20px;">Войти</button>
-            <button id="regBtn" style="background:none; border:none; color:#00a8fc; margin-top:15px; width:100%; cursor:pointer;">Регистрация</button>
+            <h2>С возвращением!</h2>
+            <p style="color: var(--muted); margin-bottom: 20px; font-size: 14px;">Мы так рады, что вы снова с нами!</p>
+            <input type="text" id="nickname" placeholder="Ваш Никнейм">
+            <input type="email" id="email" placeholder="Email">
+            <input type="password" id="password" placeholder="Пароль">
+            <button class="btn" id="loginBtn" style="margin-top: 10px;">Войти</button>
+            <button id="regBtn" style="background:none; border:none; color:#00a8fc; margin-top:15px; cursor:pointer; width:100%;">Зарегистрироваться</button>
         </div>
     </div>
 
     <div id="chatSection">
-        <div class="chat-header">
-            <span># основной-чат</span>
-            <button id="logoutBtn" style="background:none; border:none; color:var(--muted); cursor:pointer;">Выйти</button>
+        <div class="header">
+            <span># основной-чат 📸</span>
+            <span id="logout" style="cursor:pointer; opacity:0.5; font-size:11px;">Выйти</span>
         </div>
         <div id="messages"></div>
+        <div id="status"></div>
         <div class="input-area">
+            <label class="attach-btn">📎<input type="file" id="fileInput" accept="image/*"></label>
             <div class="input-wrapper">
                 <input type="text" id="msgInput" placeholder="Написать сообщение..." autocomplete="off">
             </div>
-            <button id="sendBtn" style="width:auto; padding: 12px 20px;" class="btn">➤</button>
+            <button id="sendBtn" style="width:auto; padding: 10px 20px;" class="btn">➤</button>
         </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut, updateProfile } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, updateProfile, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         import { getDatabase, ref, push, onChildAdded, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
         const firebaseConfig = { 
@@ -105,53 +91,80 @@
         const authSec = document.getElementById('authSection');
         const chatSec = document.getElementById('chatSection');
         const msgsDiv = document.getElementById('messages');
-        const nickInput = document.getElementById('nickname');
+        const statusMsg = document.getElementById('status');
+
+        // ТВОЙ КЛЮЧ IMGBB
+        const IMGBB_API_KEY = "b0ae43a6f86ace22817aa2f7b101fa31";
 
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 authSec.style.display = 'none';
                 chatSec.style.display = 'flex';
-                startChat(user);
+                loadChat(user);
             } else {
                 authSec.style.display = 'flex';
                 chatSec.style.display = 'none';
             }
         });
 
-        // ВХОД
-        document.getElementById('loginBtn').onclick = () => {
-            signInWithEmailAndPassword(auth, email.value, password.value).catch(e => alert(e.message));
-        };
-
-        // РЕГИСТРАЦИЯ + СОХРАНЕНИЕ НИКА
+        // АВТОРИЗАЦИЯ
+        document.getElementById('loginBtn').onclick = () => signInWithEmailAndPassword(auth, email.value, password.value).catch(e => alert("Ошибка: " + e.message));
         document.getElementById('regBtn').onclick = async () => {
-            if(!nickInput.value) return alert("Введите никнейм!");
+            if(!nickname.value) return alert("Введите ник!");
             try {
                 const res = await createUserWithEmailAndPassword(auth, email.value, password.value);
-                await updateProfile(res.user, { displayName: nickInput.value });
-                location.reload(); 
+                await updateProfile(res.user, { displayName: nickname.value });
+                location.reload();
             } catch (e) { alert(e.message); }
         };
+        document.getElementById('logout').onclick = () => signOut(auth);
 
-        document.getElementById('logoutBtn').onclick = () => signOut(auth);
+        // ЗАГРУЗКА ИЗОБРАЖЕНИЯ
+        document.getElementById('fileInput').onchange = async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
 
-        function startChat(user) {
+            statusMsg.innerText = "☁️ Загрузка фото...";
+            
+            const formData = new FormData();
+            formData.append("image", file);
+
+            try {
+                const response = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, {
+                    method: "POST",
+                    body: formData
+                });
+                const result = await response.json();
+                
+                if(result.success) {
+                    push(ref(db, 'chat_messages'), {
+                        image: result.data.url,
+                        name: auth.currentUser.displayName || auth.currentUser.email,
+                        uid: auth.currentUser.uid,
+                        time: serverTimestamp()
+                    });
+                }
+                statusMsg.innerText = "";
+            } catch (err) {
+                alert("Ошибка при загрузке фото");
+                statusMsg.innerText = "";
+            }
+        };
+
+        // ЗАГРУЗКА СООБЩЕНИЙ
+        function loadChat(user) {
             msgsDiv.innerHTML = "";
             onChildAdded(ref(db, 'chat_messages'), (snap) => {
                 const data = snap.val();
                 const isMine = data.uid === user.uid;
                 
-                // Форматируем время
-                const date = data.time ? new Date(data.time) : new Date();
-                const timeStr = date.getHours().toString().padStart(2, '0') + ":" + date.getMinutes().toString().padStart(2, '0');
+                let content = data.text ? `<div>${data.text}</div>` : '';
+                if(data.image) content += `<img src="${data.image}" class="chat-img" onclick="window.open('${data.image}')">`;
 
                 const msgHtml = `
                     <div class="msg-container ${isMine ? 'mine' : ''}">
-                        <div class="msg-info">
-                            <span class="username">${data.name || 'Аноним'}</span>
-                            <span class="timestamp">${timeStr}</span>
-                        </div>
-                        <div class="bubble">${data.text}</div>
+                        <div class="username">${data.name}</div>
+                        <div class="bubble">${content}</div>
                     </div>
                 `;
                 msgsDiv.insertAdjacentHTML('beforeend', msgHtml);
@@ -159,11 +172,12 @@
             });
         }
 
+        // ОТПРАВКА ТЕКСТА
         const sendMsg = () => {
-            if(msgInput.value && auth.currentUser) {
+            if(msgInput.value.trim() && auth.currentUser) {
                 push(ref(db, 'chat_messages'), {
                     text: msgInput.value,
-                    name: auth.currentUser.displayName || auth.currentUser.email.split('@')[0],
+                    name: auth.currentUser.displayName || auth.currentUser.email,
                     uid: auth.currentUser.uid,
                     time: serverTimestamp()
                 });
