@@ -2,75 +2,99 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <meta name="theme-color" content="#1e1f22">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Discord Clone</title>
-    
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    
-    <script src="https://cdn.tailwindcss.com"></script>
-    
     <style>
-        * {
-            margin: 0; padding: 0; box-sizing: border-box;
-            font-family: 'Inter', sans-serif;
-            -webkit-font-smoothing: antialiased;
-            -webkit-tap-highlight-color: transparent;
+        :root {
+            --bg-main: #313338;
+            --bg-input: #1e1f22;
+            --blurple: #5865f2;
+            --text-main: #f2f3f5;
+            --text-muted: #b5bac1;
         }
 
-        html, body {
-            height: 100dvh;
-            background-color: #313338; /* Темный фон Discord сразу */
-            color: #f2f3f5;
-            overflow: hidden;
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: sans-serif; }
+
+        body {
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            justify-center;
+            height: 100vh;
+            padding: 20px;
+        }
+
+        .auth-card {
+            background-color: var(--bg-main);
             width: 100%;
+            max-width: 400px;
+            text-align: center;
         }
 
-        /* ЗАПЛАТКА: Эти стили сработают, если Tailwind не загрузится */
-        .discord-blurple { background-color: #5865f2 !important; }
-        .bg-tertiary { background-color: #1e1f22 !important; }
-        
+        h1 { font-size: 24px; margin-bottom: 8px; font-weight: bold; }
+        p { color: var(--text-muted); font-size: 14px; margin-bottom: 25px; }
+
+        .field { text-align: left; margin-bottom: 20px; }
+        label { 
+            display: block; 
+            color: var(--text-muted); 
+            font-size: 12px; 
+            font-weight: bold; 
+            text-transform: uppercase; 
+            margin-bottom: 8px; 
+        }
+
         input {
-            background-color: #1e1f22 !important;
-            border: none !important;
-            color: white !important;
-            outline: none !important;
-        }
-
-        input:-webkit-autofill {
-            -webkit-box-shadow: 0 0 0px 1000px #1e1f22 inset !important;
-            -webkit-text-fill-color: white !important;
-        }
-
-        .btn-primary {
             width: 100%;
+            background-color: var(--bg-input);
+            border: none;
             padding: 12px;
             border-radius: 4px;
-            font-weight: bold;
+            color: white;
+            font-size: 16px;
+        }
+
+        .login-btn {
+            width: 100%;
+            background-color: var(--blurple);
+            color: white;
             border: none;
+            padding: 14px;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 16px;
+            margin-top: 10px;
             cursor: pointer;
-            transition: 0.2s;
+        }
+
+        .reg-link {
+            display: block;
+            margin-top: 15px;
+            color: #00a8fc;
+            text-decoration: none;
+            font-size: 14px;
         }
     </style>
 </head>
-<body class="flex items-center justify-center p-4">
+<body>
 
-    <div id="authScreen" class="w-full max-w-[420px] bg-[#313338] p-8 rounded-lg shadow-2xl">
-        <h1 class="text-2xl font-bold text-center mb-2">С возвращением!</h1>
-        <p class="text-[#b5bac1] text-center mb-6 text-sm">Мы так рады видеть вас снова!</p>
+    <div class="auth-card">
+        <h1>С возвращением!</h1>
+        <p>Мы так рады видеть вас снова!</p>
         
-        <div class="space-y-4">
-            <div>
-                <label class="block text-[11px] font-bold text-[#b5bac1] uppercase mb-2 tracking-wide">Email</label>
-                <input type="email" id="email" class="w-full p-3 rounded bg-tertiary">
-            </div>
-            <div>
-                <label class="block text-[11px] font-bold text-[#b5bac1] uppercase mb-2 tracking-wide">Пароль</label>
-                <input type="password" id="password" class="w-full p-3 rounded bg-tertiary">
-            </div>
-            <button id="loginBtn" class="btn-primary discord-blurple text-white hover:bg-[#4752c4]">Вход</button>
-            <button id="regBtn" class="w-full text-sm text-[#00a8fc] hover:underline bg-transparent border-none mt-2 cursor-pointer">Зарегистрироваться</button>
+        <div class="field">
+            <label>Email</label>
+            <input type="email" id="email">
         </div>
+
+        <div class="field">
+            <label>Пароль</label>
+            <input type="password" id="password">
+        </div>
+
+        <button class="login-btn">Вход</button>
+        <a href="#" class="reg-link">Зарегистрироваться</a>
     </div>
 
 </body>
