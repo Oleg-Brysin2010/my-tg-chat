@@ -1,4 +1,26 @@
-<script type="module">
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Вход</title>
+    <style>
+        body { background: #313338; color: white; font-family: sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; }
+        .card { background: #2b2d31; padding: 30px; border-radius: 8px; width: 300px; text-align: center; }
+        input { width: 100%; padding: 10px; margin: 10px 0; border-radius: 4px; border: none; background: #1e1f22; color: white; box-sizing: border-box; }
+        button { width: 100%; padding: 10px; background: #5865f2; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h2>Вход</h2>
+        <input type="email" id="email" placeholder="Email">
+        <input type="password" id="password" placeholder="Пароль">
+        <button id="loginBtn">Войти</button>
+        <button id="regBtn" style="background:none; color:#00a8fc; font-size:12px; margin-top:10px;">Зарегистрироваться</button>
+    </div>
+
+    <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
@@ -8,32 +30,26 @@
             projectId: "telegram-clone-роскамнадзор", 
             storageBucket: "telegram-clone-roskamnadzor.firebasestorage.app", 
             messagingSenderId: "935106885464", 
-            appId: "1:935106885464:web:308629db74f952bea3172d", 
-            measurementId: "G-S4SM6LWZZQ" 
+            appId: "1:935106885464:web:308629db74f952bea3172d"
         };
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
 
-        const emailInput = document.getElementById('email');
-        const passwordInput = document.getElementById('password');
+        const goChat = () => { window.location.href = "chat.html"; };
 
-        // Вход
         document.getElementById('loginBtn').onclick = async () => {
             try {
-                await signInWithEmailAndPassword(auth, emailInput.value, passwordInput.value);
-                alert("Успешный вход!");
-                window.location.href = "chat.html"; // ПЕРЕХОД
-            } catch (e) { alert("Ошибка: " + e.message); }
+                await signInWithEmailAndPassword(auth, email.value, password.value);
+                goChat();
+            } catch (e) { alert(e.message); }
         };
 
-        // Регистрация
         document.getElementById('regBtn').onclick = async () => {
             try {
-                await createUserWithEmailAndPassword(auth, emailInput.value, passwordInput.value);
-                alert("Аккаунт создан!");
-                window.location.href = "chat.html"; // ПЕРЕХОД
-            } catch (e) { alert("Ошибка: " + e.message); }
+                await createUserWithEmailAndPassword(auth, email.value, password.value);
+                goChat();
+            } catch (e) { alert(e.message); }
         };
     </script>
 </body>
