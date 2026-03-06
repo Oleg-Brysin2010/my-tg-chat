@@ -6,63 +6,72 @@
     <meta name="theme-color" content="#1e1f22">
     <title>Discord Clone</title>
     
-    <link href="https://fonts.googleapis.com/css2?family=GG+Sans:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     
     <script src="https://cdn.tailwindcss.com"></script>
+    
     <style>
-        /* 2. УБИВАЕМ ВСЕ СТАНДАРТНЫЕ СТИЛИ БРАУЗЕРА */
         * {
             margin: 0; padding: 0; box-sizing: border-box;
-            font-family: 'GG Sans', 'Inter', sans-serif;
-            -webkit-font-smoothing: antialiased; /* Сглаживание шрифтов в Chrome */
-            -webkit-tap-highlight-color: transparent; /* Убираем синий блик при клике */
-            outline: none !important; /* Убираем синие рамки */
+            font-family: 'Inter', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -webkit-tap-highlight-color: transparent;
         }
 
         html, body {
-            height: 100dvh; /* Динамическая высота (игнорирует полоски Chrome) */
-            background-color: #313338;
+            height: 100dvh;
+            background-color: #313338; /* Темный фон Discord сразу */
+            color: #f2f3f5;
             overflow: hidden;
-            position: fixed; /* Запрещает "резиновый" скролл в Google */
             width: 100%;
         }
 
-        /* 3. ИСПРАВЛЯЕМ ЖЕЛТЫЕ ПОЛЯ (AUTOFILL) В CHROME */
+        /* ЗАПЛАТКА: Эти стили сработают, если Tailwind не загрузится */
+        .discord-blurple { background-color: #5865f2 !important; }
+        .bg-tertiary { background-color: #1e1f22 !important; }
+        
+        input {
+            background-color: #1e1f22 !important;
+            border: none !important;
+            color: white !important;
+            outline: none !important;
+        }
+
         input:-webkit-autofill {
             -webkit-box-shadow: 0 0 0px 1000px #1e1f22 inset !important;
             -webkit-text-fill-color: white !important;
         }
 
-        /* 4. ДЕЛАЕМ СКРОЛЛБАР КАК В DISCORD (Chrome поддерживает только webkit) */
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: #2b2d31; }
-        ::-webkit-scrollbar-thumb { background: #1a1b1e; border-radius: 4px; }
-
-        .discord-blurple { background-color: #5865f2; }
-        .bg-sidebar { background-color: #2b2d31; }
-        .bg-tertiary { background-color: #1e1f22; }
+        .btn-primary {
+            width: 100%;
+            padding: 12px;
+            border-radius: 4px;
+            font-weight: bold;
+            border: none;
+            cursor: pointer;
+            transition: 0.2s;
+        }
     </style>
 </head>
-<body class="flex text-[#f2f3f5]">
+<body class="flex items-center justify-center p-4">
 
-    <div id="authScreen" class="fixed inset-0 z-[100] bg-[#313338] md:bg-[#5865f2] flex items-center justify-center p-4">
-        <div class="bg-[#313338] p-8 rounded-lg shadow-2xl w-full max-w-[420px]">
-            <h1 class="text-2xl font-bold text-center mb-2">С возвращением!</h1>
-            <p class="text-[#b5bac1] text-center mb-6 text-sm">Мы так рады видеть вас снова!</p>
-            <div class="space-y-4">
-                <div>
-                    <label class="block text-[11px] font-bold text-[#b5bac1] uppercase mb-2 tracking-wide">Email</label>
-                    <input type="email" id="email" class="w-full bg-tertiary p-3 rounded text-white border-none focus:ring-1 focus:ring-[#5865f2]">
-                </div>
-                <div>
-                    <label class="block text-[11px] font-bold text-[#b5bac1] uppercase mb-2 tracking-wide">Пароль</label>
-                    <input type="password" id="password" class="w-full bg-tertiary p-3 rounded text-white border-none">
-                </div>
-                <button id="loginBtn" class="w-full discord-blurple py-3 rounded font-bold hover:bg-[#4752c4] transition active:scale-[0.98]">Вход</button>
-                <button id="regBtn" class="text-sm text-[#00a8fc] hover:underline">Зарегистрироваться</button>
+    <div id="authScreen" class="w-full max-w-[420px] bg-[#313338] p-8 rounded-lg shadow-2xl">
+        <h1 class="text-2xl font-bold text-center mb-2">С возвращением!</h1>
+        <p class="text-[#b5bac1] text-center mb-6 text-sm">Мы так рады видеть вас снова!</p>
+        
+        <div class="space-y-4">
+            <div>
+                <label class="block text-[11px] font-bold text-[#b5bac1] uppercase mb-2 tracking-wide">Email</label>
+                <input type="email" id="email" class="w-full p-3 rounded bg-tertiary">
             </div>
+            <div>
+                <label class="block text-[11px] font-bold text-[#b5bac1] uppercase mb-2 tracking-wide">Пароль</label>
+                <input type="password" id="password" class="w-full p-3 rounded bg-tertiary">
+            </div>
+            <button id="loginBtn" class="btn-primary discord-blurple text-white hover:bg-[#4752c4]">Вход</button>
+            <button id="regBtn" class="w-full text-sm text-[#00a8fc] hover:underline bg-transparent border-none mt-2 cursor-pointer">Зарегистрироваться</button>
         </div>
     </div>
 
-    </body>
+</body>
 </html>
