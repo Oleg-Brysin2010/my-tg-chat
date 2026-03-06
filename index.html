@@ -2,102 +2,128 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Discord Ultimate Fix</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Discord Ultimate Fixed</title>
     <style>
         :root { 
             --bg: #313338; --card: #2b2d31; --input: #1e1f22; 
             --blurple: #5865f2; --text: #f2f3f5; --muted: #b5bac1; 
-            --danger: #ed4245; 
         }
         
-        * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, sans-serif; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+        * { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
         
-        body { background: var(--bg); color: var(--text); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+        /* ГЛАВНОЕ ИСПРАВЛЕНИЕ ВЫСОТЫ */
+        body { 
+            background: var(--bg); 
+            color: var(--text); 
+            height: 100dvh; /* Динамическая высота под мобильные браузеры */
+            display: flex; 
+            flex-direction: column; 
+            overflow: hidden; 
+        }
 
-        /* HEADER */
-        .header { background: var(--card); padding: 15px; font-weight: bold; border-bottom: 1px solid #1e1f22; display: flex; justify-content: space-between; align-items: center; z-index: 10; flex-shrink: 0; }
+        .header { 
+            background: var(--card); 
+            padding: 15px; 
+            padding-top: calc(env(safe-area-inset-top) + 10px); /* Отступ сверху для "челок" */
+            font-weight: bold; 
+            border-bottom: 1px solid #1e1f22; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            flex-shrink: 0; 
+        }
         
-        /* MESSAGES AREA */
-        #messages { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 12px; scroll-behavior: smooth; }
+        #messages { 
+            flex: 1; 
+            overflow-y: auto; 
+            padding: 15px; 
+            display: flex; 
+            flex-direction: column; 
+            gap: 12px; 
+            scroll-behavior: smooth; 
+        }
         
-        /* MESSAGE BUBBLES */
-        .msg-container { display: flex; flex-direction: column; max-width: 85%; align-self: flex-start; cursor: pointer; }
+        .msg-container { display: flex; flex-direction: column; max-width: 85%; align-self: flex-start; }
         .msg-container.mine { align-self: flex-end; align-items: flex-end; }
         .username { font-size: 11px; font-weight: bold; margin-bottom: 2px; color: #00a8fc; }
-        .mine .username { color: #fff; text-align: right; }
-        
         .bubble { background: #383a40; padding: 10px 14px; border-radius: 2px 16px 16px 16px; font-size: 15px; line-height: 1.4; word-wrap: break-word; }
         .mine .bubble { background: var(--blurple); border-radius: 16px 16px 2px 16px; }
-        
         .chat-img { max-width: 100%; border-radius: 8px; margin-top: 5px; display: block; border: 1px solid rgba(255,255,255,0.1); }
 
-        /* TYPING INDICATOR */
-        #typing { font-size: 12px; color: var(--muted); padding: 5px 20px; height: 25px; font-style: italic; flex-shrink: 0; }
+        #typing { font-size: 11px; color: var(--muted); padding: 2px 15px; height: 18px; font-style: italic; }
 
-        /* INPUT AREA */
-        .input-area { padding: 10px 15px; background: var(--bg); border-top: 1px solid #2b2d31; flex-shrink: 0; display: flex; flex-direction: column; gap: 5px; }
+        /* ИСПРАВЛЕНИЕ НИЖНЕЙ ПАНЕЛИ */
+        .input-area { 
+            padding: 10px 15px; 
+            /* Безопасный отступ снизу для безрамочных экранов */
+            padding-bottom: calc(env(safe-area-inset-bottom) + 10px); 
+            background: var(--bg); 
+            border-top: 1px solid #2b2d31; 
+            flex-shrink: 0; 
+        }
         
-        /* Emoji Bar */
-        .emoji-bar { display: flex; gap: 10px; padding: 5px 0; overflow-x: auto; white-space: nowrap; -webkit-overflow-scrolling: touch; }
-        .emoji-bar::-webkit-scrollbar { display: none; } /* Скрываем скроллбар */
-        .emoji-btn { font-size: 20px; cursor: pointer; transition: 0.2s; padding: 3px; }
-        .emoji-btn:hover { transform: scale(1.2); }
+        .emoji-bar { display: flex; gap: 12px; padding-bottom: 8px; overflow-x: auto; }
+        .emoji-bar::-webkit-scrollbar { display: none; }
+        .emoji-btn { font-size: 20px; cursor: pointer; }
 
-        /* Input Row */
         .input-row { display: flex; gap: 10px; align-items: center; }
-        .input-wrapper { flex: 1; background: #383a40; border-radius: 20px; display: flex; align-items: center; padding: 0 15px; height: 45px; }
-        #msgInput { background: transparent; border: none; color: white; outline: none; flex: 1; font-size: 15px; width: 100%; }
+        .input-wrapper { flex: 1; background: #383a40; border-radius: 22px; display: flex; align-items: center; padding: 0 15px; height: 44px; }
+        #msgInput { background: transparent; border: none; color: white; outline: none; flex: 1; font-size: 16px; }
         
-        /* Buttons */
-        .attach-label { cursor: pointer; font-size: 22px; padding: 5px; opacity: 0.7; transition: 0.2s; flex-shrink: 0; }
-        .attach-label:hover { opacity: 1; transform: scale(1.1); }
-        
-        .btn { padding: 12px; background: var(--blurple); color: white; border: none; font-weight: bold; cursor: pointer; transition: 0.2s; font-size: 15px; }
-        .btn:hover { background: #4752c4; }
-        .btn-send { border-radius: 50%; width: 45px; height: 45px; padding: 0; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 18px; }
+        .btn-send { 
+            background: var(--blurple); 
+            border: none; 
+            border-radius: 50%; 
+            width: 44px; 
+            height: 44px; 
+            color: white; 
+            cursor: pointer; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            font-size: 18px;
+            flex-shrink: 0;
+        }
 
-        /* AUTH SECTION (OVERLAY) */
-        #authSection { position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 100; display: flex; align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(5px); }
-        .auth-card { background: var(--card); padding: 30px; border-radius: 8px; width: 100%; max-width: 380px; text-align: center; box-shadow: 0 8px 24px rgba(0,0,0,0.5); }
-        .auth-card h2 { margin-bottom: 20px; }
-        .auth-card input { width: 100%; padding: 12px; margin: 8px 0; border-radius: 4px; border: none; background: var(--input); color: white; outline: none; font-size: 16px; }
+        #authSection { position: fixed; inset: 0; background: var(--bg); z-index: 100; display: flex; align-items: center; justify-content: center; padding: 20px; }
+        .auth-card { background: var(--card); padding: 30px; border-radius: 12px; width: 100%; max-width: 360px; text-align: center; }
+        .auth-card input { width: 100%; padding: 12px; margin: 8px 0; border-radius: 6px; border: none; background: var(--input); color: white; outline: none; }
     </style>
 </head>
 <body>
 
     <div id="authSection">
         <div class="auth-card">
-            <h2>Welcome back!</h2>
+            <h2 style="margin-bottom:20px;">Discord Clone</h2>
             <input type="text" id="nickname" placeholder="Никнейм">
             <input type="email" id="email" placeholder="Email">
             <input type="password" id="password" placeholder="Пароль">
-            <button class="btn" id="loginBtn" style="width:100%; margin-top:15px; border-radius:4px;">Войти</button>
-            <button id="regBtn" style="background:none; border:none; color:#00a8fc; margin-top:20px; cursor:pointer; font-size:14px;">Регистрация</button>
+            <button onclick="login()" style="width:100%; padding:12px; background:var(--blurple); border:none; color:white; border-radius:6px; font-weight:bold; margin-top:10px;">Войти</button>
+            <p onclick="register()" style="color:#00a8fc; margin-top:15px; cursor:pointer; font-size:14px;">Создать аккаунт</p>
         </div>
     </div>
 
     <div class="header">
-        <span># main-chat 💬</span>
-        <span id="logout" style="opacity:0.5; font-size:11px; cursor:pointer; padding: 5px;">Logout</span>
+        <span># основной-чат 💬</span>
+        <span onclick="logout()" style="opacity:0.5; font-size:12px;">Выйти</span>
     </div>
 
     <div id="messages"></div>
-    
     <div id="typing"></div>
 
     <div class="input-area">
         <div class="emoji-bar">
             <span class="emoji-btn">🔥</span><span class="emoji-btn">😂</span><span class="emoji-btn">❤️</span>
             <span class="emoji-btn">👍</span><span class="emoji-btn">😎</span><span class="emoji-btn">💀</span>
-            <span class="emoji-btn">🤨</span><span class="emoji-btn">⚡</span><span class="emoji-btn">🎉</span>
+            <span class="emoji-btn">⚡</span>
         </div>
         <div class="input-row">
-            <label class="attach-label">📎<input type="file" id="fileInput" accept="image/*" style="display:none;"></label>
+            <label style="font-size:24px; cursor:pointer;">📎<input type="file" id="fileInput" accept="image/*" style="display:none;"></label>
             <div class="input-wrapper">
-                <input type="text" id="msgInput" placeholder="Message..." autocomplete="off">
+                <input type="text" id="msgInput" placeholder="Сообщение..." autocomplete="off">
             </div>
-            <button id="sendBtn" class="btn btn-send">➤</button>
+            <button id="sendBtn" class="btn-send">➤</button>
         </div>
     </div>
 
@@ -121,118 +147,65 @@
         const msgsDiv = document.getElementById('messages');
         const typingDiv = document.getElementById('typing');
         const msgInput = document.getElementById('msgInput');
-        const authSec = document.getElementById('authSection');
 
         onAuthStateChanged(auth, (user) => {
-            if (user) {
-                authSec.style.display = 'none';
-                initChat(user);
-            } else {
-                authSec.style.display = 'flex';
-                msgsDiv.innerHTML = ''; // Очищаем при выходе
-            }
+            document.getElementById('authSection').style.display = user ? 'none' : 'flex';
+            if(user) initChat(user);
         });
 
-        // АВТОРИЗАЦИЯ
-        document.getElementById('loginBtn').onclick = () => {
-            if(!email.value || !password.value) return alert("Заполните Email и Пароль");
-            signInWithEmailAndPassword(auth, email.value, password.value).catch(e => alert("Ошибка: " + e.message));
-        };
-        
-        document.getElementById('regBtn').onclick = async () => {
-            if(!nickname.value || !email.value || !password.value) return alert("Заполните все поля для регистрации");
+        window.login = () => signInWithEmailAndPassword(auth, email.value, password.value).catch(e => alert(e.message));
+        window.register = async () => {
             try {
                 const res = await createUserWithEmailAndPassword(auth, email.value, password.value);
                 await updateProfile(res.user, { displayName: nickname.value });
                 location.reload();
-            } catch (e) { alert("Ошибка регистрации: " + e.message); }
+            } catch(e) { alert(e.message); }
         };
-        
-        document.getElementById('logout').onclick = () => signOut(auth);
+        window.logout = () => signOut(auth);
 
         function initChat(user) {
-            // ТИПАЕТ... (Status)
             msgInput.oninput = () => {
                 set(ref(db, `typing/${user.uid}`), msgInput.value.length > 0 ? user.displayName : null);
-                // Сбрасываем статус через 3 секунды неактивности
-                if(msgInput.dataset.timer) clearTimeout(msgInput.dataset.timer);
-                msgInput.dataset.timer = setTimeout(() => set(ref(db, `typing/${user.uid}`), null), 3000);
+                if(window.tTimer) clearTimeout(window.tTimer);
+                window.tTimer = setTimeout(() => set(ref(db, `typing/${user.uid}`), null), 2000);
             };
 
             onValue(ref(db, 'typing'), (snap) => {
-                const typers = snap.val() || {};
-                const names = Object.values(typers).filter(n => n && n !== user.displayName);
+                const names = Object.values(snap.val() || {}).filter(n => n && n !== user.displayName);
                 typingDiv.innerText = names.length ? `${names.join(', ')} печатает...` : '';
             });
 
-            // ЗАГРУЗКА И УДАЛЕНИЕ (скролл вниз при добавлении)
             onChildAdded(ref(db, 'messages'), (snap) => {
                 const d = snap.val();
                 const isMine = d.uid === user.uid;
                 const div = document.createElement('div');
                 div.id = 'msg-' + snap.key;
                 div.className = `msg-container ${isMine ? 'mine' : ''}`;
+                if(isMine) div.onclick = () => confirm("Удалить?") && remove(ref(db, `messages/${snap.key}`));
                 
-                // Удаление по клику для своих сообщений
-                if(isMine) {
-                    div.onclick = () => confirm("Удалить это сообщение?") && remove(ref(db, `messages/${snap.key}`));
-                }
-                
-                let html = `<div class="username">${d.name}</div><div class="bubble">`;
-                if(d.text) html += `<div>${d.text}</div>`;
-                if(d.image) html += `<img src="${d.image}" class="chat-img" loading="lazy">`;
-                html += `</div>`;
-                div.innerHTML = html;
+                div.innerHTML = `<div class="username">${d.name}</div><div class="bubble">${d.text ? `<div>${d.text}</div>` : ''}${d.image ? `<img src="${d.image}" class="chat-img">` : ''}</div>`;
                 msgsDiv.appendChild(div);
-                msgsDiv.scrollTop = msgsDiv.scrollHeight; // Авто-скролл вниз
+                msgsDiv.scrollTop = msgsDiv.scrollHeight;
             });
 
-            onChildRemoved(ref(db, 'messages'), (snap) => {
-                const msgEl = document.getElementById('msg-' + snap.key);
-                if(msgEl) msgEl.remove();
-            });
+            onChildRemoved(ref(db, 'messages'), (snap) => document.getElementById('msg-' + snap.key)?.remove());
         }
 
-        // ОТПРАВКА
         const send = (data) => push(ref(db, 'messages'), { ...data, name: auth.currentUser.displayName, uid: auth.currentUser.uid, time: serverTimestamp() });
         
-        const handleSendText = () => {
-            const text = msgInput.value.trim();
-            if(text) {
-                send({text: text});
-                msgInput.value = '';
-                // Сбрасываем статус "печатает" сразу после отправки
-                set(ref(db, `typing/${auth.currentUser.uid}`), null);
-            }
-        };
-
-        document.getElementById('sendBtn').onclick = handleSendText;
-        msgInput.onkeypress = (e) => { if(e.key === 'Enter') handleSendText(); };
+        document.getElementById('sendBtn').onclick = () => { if(msgInput.value.trim()){ send({text: msgInput.value}); msgInput.value = ''; set(ref(db, `typing/${auth.currentUser.uid}`), null); } };
+        msgInput.onkeypress = (e) => e.key === 'Enter' && document.getElementById('sendBtn').click();
         
-        // Эмодзи
-        document.querySelectorAll('.emoji-btn').forEach(b => {
-            b.onclick = () => {
-                msgInput.value += b.innerText;
-                msgInput.focus();
-                msgInput.dispatchEvent(new Event('input')); // Триггерим статус "печатает"
-            };
-        });
+        document.querySelectorAll('.emoji-btn').forEach(b => b.onclick = () => { msgInput.value += b.innerText; msgInput.focus(); });
 
-        // Фото (ImgBB)
         document.getElementById('fileInput').onchange = async (e) => {
-            const f = e.target.files[0];
-            if(!f) return;
-            typingDiv.innerText = "☁️ Загрузка изображения...";
+            const f = e.target.files[0]; if(!f) return;
+            typingDiv.innerText = "☁️ Загрузка...";
             const fd = new FormData(); fd.append("image", f);
-            try {
-                const r = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_KEY}`, { method: "POST", body: fd });
-                const res = await r.json();
-                if(res.success) {
-                    send({image: res.data.url});
-                } else { alert("Ошибка ImgBB"); }
-            } catch(err) { alert("Ошибка сети"); }
+            const r = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_KEY}`, { method: "POST", body: fd });
+            const res = await r.json();
+            send({image: res.data.url});
             typingDiv.innerText = "";
-            e.target.value = ''; // Сброс инпута
         };
     </script>
 </body>
