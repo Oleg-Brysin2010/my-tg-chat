@@ -3,44 +3,44 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Chat App</title>
+    <title>Discord Clone</title>
     <style>
         :root { --bg: #313338; --card: #2b2d31; --input: #1e1f22; --blurple: #5865f2; }
-        body { background: var(--bg); color: white; font-family: sans-serif; margin: 0; height: 100vh; overflow: hidden; }
+        body { background: var(--bg); color: white; font-family: sans-serif; margin: 0; height: 100vh; display: flex; flex-direction: column; }
         
-        /* Центровка входа */
-        #authSection { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; padding: 20px; }
-        .auth-card { background: var(--card); padding: 30px; border-radius: 8px; width: 100%; max-width: 350px; box-shadow: 0 8px 24px rgba(0,0,0,0.2); }
+        #authSection { display: flex; align-items: center; justify-content: center; flex: 1; }
+        .auth-card { background: var(--card); padding: 30px; border-radius: 8px; width: 90%; max-width: 350px; text-align: center; }
         
         input { width: 100%; padding: 12px; margin: 10px 0; border-radius: 4px; border: none; background: var(--input); color: white; box-sizing: border-box; outline: none; }
         button { width: 100%; padding: 14px; background: var(--blurple); color: white; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; }
         
-        /* Чат */
         #chatSection { display: none; flex-direction: column; height: 100%; }
-        #messages { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 10px; }
-        .msg { background: #383a40; padding: 10px; border-radius: 8px; max-width: 80%; word-wrap: break-word; }
+        #messages { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 8px; }
+        .msg { background: #383a40; padding: 10px; border-radius: 8px; max-width: 85%; align-self: flex-start; }
         .msg.mine { align-self: flex-end; background: var(--blurple); }
-        .input-area { padding: 20px; background: var(--bg); display: flex; gap: 10px; }
+        .user-label { font-size: 10px; color: #00a8fc; margin-bottom: 4px; font-weight: bold; }
+        
+        .input-area { padding: 15px; background: var(--bg); display: flex; gap: 10px; border-top: 1px solid #2b2d31; }
     </style>
 </head>
 <body>
 
     <div id="authSection">
         <div class="auth-card">
-            <h2 style="text-align:center; margin-top:0;">Вход в чат</h2>
-            <input type="email" id="email" placeholder="Ваш Email">
+            <h2>С возвращением!</h2>
+            <input type="email" id="email" placeholder="Email">
             <input type="password" id="password" placeholder="Пароль">
             <button id="loginBtn">Войти</button>
-            <p id="regBtn" style="color:#00a8fc; text-align:center; font-size:13px; cursor:pointer; margin-top:15px;">Зарегистрироваться</p>
+            <p id="regBtn" style="color:#00a8fc; cursor:pointer; font-size:14px; margin-top:15px;">Создать аккаунт</p>
         </div>
     </div>
 
     <div id="chatSection">
-        <div style="background:#2b2d31; padding:15px; text-align:center; font-weight:bold; border-bottom:1px solid #1e1f22;"># общий-чат</div>
-        <div id="messages"></div>
+        <div style="background:#2b2d31; padding:15px; text-align:center; font-weight:bold;"># основной-чат</div>
+        <div id="messages">Подключение к серверу...</div>
         <div class="input-area">
             <input type="text" id="msgInput" placeholder="Написать сообщение...">
-            <button id="sendBtn" style="width:auto; padding:10px 20px;">➤</button>
+            <button id="sendBtn" style="width:auto;">➤</button>
         </div>
     </div>
 
@@ -63,12 +63,11 @@
         const authSec = document.getElementById('authSection');
         const chatSec = document.getElementById('chatSection');
         const msgsDiv = document.getElementById('messages');
-        let user = null;
+        let currentUser = null;
 
-        // Следим за входом
-        onAuthStateChanged(auth, (u) => {
-            if (u) {
-                user = u;
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                currentUser = user;
                 authSec.style.display = 'none';
                 chatSec.style.display = 'flex';
                 startChat();
@@ -78,24 +77,28 @@
             }
         });
 
-        // Кнопки
-        document.getElementById('loginBtn').onclick = () => signInWithEmailAndPassword(auth, email.value, password.value).catch(e => alert("Ошибка: " + e.message));
-        document.getElementById('regBtn').onclick = () => createUserWithEmailAndPassword(auth, email.value, password.value).catch(e => alert("Ошибка: " + e.message));
+        document.getElementById('loginBtn').onclick = () => signInWithEmailAndPassword(auth, email.value, password.value).catch(e => alert(e.message));
+        document.getElementById('regBtn').onclick = () => createUserWithEmailAndPassword(auth, email.value, password.value).catch(e => alert(e.message));
 
         function startChat() {
-            onChildAdded(ref(db, 'messages'), (snap) => {
+            const messagesRef = ref(db, 'chat_messages');
+            
+            // Как только пришло первое сообщение, убираем надпись "Подключение"
+            onChildAdded(messagesRef, (snap) => {
+                if(msgsDiv.innerText === "Подключение к серверу...") msgsDiv.innerHTML = "";
                 const data = snap.val();
+                const isMine = data.email === currentUser.email;
                 const div = document.createElement('div');
-                div.className = `msg ${data.email === user.email ? 'mine' : ''}`;
-                div.innerHTML = `<div style="font-size:10px; opacity:0.7;">${data.email.split('@')[0]}</div>${data.text}`;
+                div.className = `msg ${isMine ? 'mine' : ''}`;
+                div.innerHTML = `<div class="user-label">${data.email.split('@')[0]}</div>${data.text}`;
                 msgsDiv.appendChild(div);
                 msgsDiv.scrollTop = msgsDiv.scrollHeight;
             });
         }
 
         document.getElementById('sendBtn').onclick = () => {
-            if(msgInput.value) {
-                push(ref(db, 'messages'), { text: msgInput.value, email: user.email });
+            if(msgInput.value && currentUser) {
+                push(ref(db, 'chat_messages'), { text: msgInput.value, email: currentUser.email });
                 msgInput.value = '';
             }
         };
