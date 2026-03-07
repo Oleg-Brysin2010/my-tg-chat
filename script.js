@@ -2,7 +2,7 @@ import { injectSpeedInsights } from 'https://unpkg.com/@vercel/speed-insights/di
 import { inject } from 'https://unpkg.com/@vercel/analytics/dist/index.mjs';
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-import { getDatabase, ref, push, onChildAdded, onChildRemoved, remove, serverTimestamp, set, onDisconnect, onValue, update } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+import { getDatabase, ref, push, onChildAdded, onChildRemoved, remove, serverTimestamp, set, onDisconnect, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
 injectSpeedInsights();
 inject();
@@ -47,10 +47,7 @@ if (Notification.permission !== "granted") Notification.requestPermission();
 // --- АВТОРИЗАЦИЯ ---
 onAuthStateChanged(auth, (user) => {
     document.getElementById('authSection').style.display = user ? 'none' : 'flex';
-    if(user) {
-        setOnlineStatus(user);
-        loadMessages();
-    }
+    if(user) { setOnlineStatus(user); loadMessages(); }
 });
 
 document.getElementById('googleBtn').onclick = () => signInWithPopup(auth, provider);
@@ -74,36 +71,37 @@ function loadMessages() {
                 <div class="online-badge" id="online-${d.uid}" style="display:none;"></div>
             </div>
             <div class="bubble-wrap">
-                <div class="u-info">${d.name} <span class="time">${time}</span></div>
-                <div class="msg" onclick="${isMine ? `if(confirm('Удалить?')) remove(ref(db, 'messages/${snap.key}'))` : ''}">
+                <div class="u-info">
+                    ${d.name} <span class="time">${time}</span>
+                    ${isMine ? `<span class="del-btn" onclick="deleteMsg('${snap.key}')">🗑️</span>` : ''}
+                </div>
+                <div class="msg">
                     ${d.text ? `<div>${d.text}</div>` : ''}
                     ${d.image ? `<img src="${d.image}" class="chat-img">` : ''}
                 </div>
                 <div class="reactions-bar">
-                    <span class="reaction-btn" onclick="addReaction('${snap.key}', '❤️')">❤️ <span id="count-❤️-${snap.key}">0</span></span>
-                    <span class="reaction-btn" onclick="addReaction('${snap.key}', '🔥')">🔥 <span id="count-🔥-${snap.key}">0</span></span>
+                    <span class="reaction-btn" onclick="addReaction(event, '${snap.key}', '❤️')">❤️ <span id="count-❤️-${snap.key}">0</span></span>
+                    <span class="reaction-btn" onclick="addReaction(event, '${snap.key}', '🔥')">🔥 <span id="count-🔥-${snap.key}">0</span></span>
                 </div>
             </div>
         `;
         msgsDiv.appendChild(div);
         msgsDiv.scrollTop = msgsDiv.scrollHeight;
 
-        // Показ онлайна
         onValue(ref(db, `status/${d.uid}`), (s) => {
             const badge = document.getElementById(`online-${d.uid}`);
             if(badge) badge.style.display = s.exists() ? 'block' : 'none';
         });
 
-        // Слушатель реакций
         onValue(ref(db, `messages/${snap.key}/reactions`), (s) => {
             const reacts = s.val() || {};
             ['❤️', '🔥'].forEach(emoji => {
                 const count = Object.values(reacts).filter(v => v === emoji).length;
-                document.getElementById(`count-${emoji}-${snap.key}`).innerText = count;
+                const el = document.getElementById(`count-${emoji}-${snap.key}`);
+                if(el) el.innerText = count;
             });
         });
 
-        // Пуш-уведомление
         if (!isMine && d.time > Date.now() - 2000) {
             new Notification("Mlyn: " + d.name, { body: d.text || "Картинка 🖼️" });
         }
@@ -111,17 +109,22 @@ function loadMessages() {
     onChildRemoved(ref(db, 'messages'), (snap) => document.getElementById('msg-' + snap.key)?.remove());
 }
 
-window.addReaction = (msgId, emoji) => {
+// ФУНКЦИЯ УДАЛЕНИЯ (Теперь отдельная)
+window.deleteMsg = (id) => {
+    if(confirm("Удалить это сообщение?")) remove(ref(db, `messages/${id}`));
+};
+
+// ФУНКЦИЯ РЕАКЦИИ (С защитой от срабатывания клика по сообщению)
+window.addReaction = (event, msgId, emoji) => {
+    event.stopPropagation(); // Остановка клика, чтобы не вылезло удаление
     const reactRef = ref(db, `messages/${msgId}/reactions/${auth.currentUser.uid}`);
     set(reactRef, emoji);
 };
 
 const sendMessage = (data) => {
     push(ref(db, 'messages'), { 
-        ...data,
-        name: auth.currentUser.displayName, 
-        photo: auth.currentUser.photoURL,
-        uid: auth.currentUser.uid, 
+        ...data, name: auth.currentUser.displayName, 
+        photo: auth.currentUser.photoURL, uid: auth.currentUser.uid, 
         time: serverTimestamp() 
     });
 };
