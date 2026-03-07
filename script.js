@@ -1,10 +1,15 @@
+// 1. Импорт аналитики Vercel (Скорость и Посетители)
 import { injectSpeedInsights } from 'https://unpkg.com/@vercel/speed-insights/dist/index.mjs';
+import { inject } from 'https://unpkg.com/@vercel/analytics/dist/index.mjs';
+
+// 2. Импорты Firebase
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 import { getDatabase, ref, push, onChildAdded, onChildRemoved, remove, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-// Запуск аналитики Vercel
+// Запуск инструментов Vercel
 injectSpeedInsights();
+inject();
 
 const firebaseConfig = { 
     apiKey: "AIzaSyCiduYZfuWiAoJOuTuhmdDRbPWlpL1jmw4", 
