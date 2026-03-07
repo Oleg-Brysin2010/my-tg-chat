@@ -19,12 +19,13 @@ const auth = getAuth(app);
 const db = getDatabase(app);
 const provider = new GoogleAuthProvider();
 const IMGBB_KEY = "b0ae43a6f86ace22817aa2f7b101fa31";
+const ADMIN_EMAIL = "brysinoleg2@gmail.com"; // Твоя почта
 
 const msgsDiv = document.getElementById('messages');
 const msgInput = document.getElementById('msgInput');
 const statusDiv = document.getElementById('status');
 
-// --- ТЕМА ---
+// ТЕМА
 const themeBtn = document.getElementById('themeBtn');
 if (localStorage.getItem('theme') === 'light') { document.body.setAttribute('data-theme', 'light'); themeBtn.innerText = '🌙'; }
 themeBtn.onclick = () => {
@@ -34,17 +35,16 @@ themeBtn.onclick = () => {
     localStorage.setItem('theme', isLight ? 'dark' : 'light');
 };
 
-// --- ОНЛАЙН СТАТУС ---
+// СТАТУС
 function setOnlineStatus(user) {
     const userStatusRef = ref(db, `status/${user.uid}`);
     set(userStatusRef, { online: true, name: user.displayName });
     onDisconnect(userStatusRef).remove();
 }
 
-// --- УВЕДОМЛЕНИЯ ---
+// УВЕДОМЛЕНИЯ
 if (Notification.permission !== "granted") Notification.requestPermission();
 
-// --- АВТОРИЗАЦИЯ ---
 onAuthStateChanged(auth, (user) => {
     document.getElementById('authSection').style.display = user ? 'none' : 'flex';
     if(user) { setOnlineStatus(user); loadMessages(); }
@@ -53,12 +53,13 @@ onAuthStateChanged(auth, (user) => {
 document.getElementById('googleBtn').onclick = () => signInWithPopup(auth, provider);
 window.logout = () => signOut(auth);
 
-// --- ЧАТ ---
 function loadMessages() {
     msgsDiv.innerHTML = '';
     onChildAdded(ref(db, 'messages'), (snap) => {
         const d = snap.val();
         const isMine = d.uid === auth.currentUser.uid;
+        const isAdmin = auth.currentUser.email === ADMIN_EMAIL; // Проверка тебя как админа
+        const authorIsAdmin = d.email === ADMIN_EMAIL; // Проверка автора сообщения
         const time = d.time ? new Date(d.time).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '';
         
         const div = document.createElement('div');
@@ -72,8 +73,10 @@ function loadMessages() {
             </div>
             <div class="bubble-wrap">
                 <div class="u-info">
-                    ${d.name} <span class="time">${time}</span>
-                    ${isMine ? `<span class="del-btn" onclick="deleteMsg('${snap.key}')">🗑️</span>` : ''}
+                    <span class="${authorIsAdmin ? 'admin-name' : ''}">${d.name}</span>
+                    ${authorIsAdmin ? '<span class="admin-badge">👑</span>' : ''}
+                    <span class="time">${time}</span>
+                    ${(isMine || isAdmin) ? `<span class="del-btn" onclick="deleteMsg('${snap.key}')">🗑️</span>` : ''}
                 </div>
                 <div class="msg">
                     ${d.text ? `<div>${d.text}</div>` : ''}
@@ -109,14 +112,10 @@ function loadMessages() {
     onChildRemoved(ref(db, 'messages'), (snap) => document.getElementById('msg-' + snap.key)?.remove());
 }
 
-// ФУНКЦИЯ УДАЛЕНИЯ (Теперь отдельная)
-window.deleteMsg = (id) => {
-    if(confirm("Удалить это сообщение?")) remove(ref(db, `messages/${id}`));
-};
+window.deleteMsg = (id) => { if(confirm("Удалить сообщение?")) remove(ref(db, `messages/${id}`)); };
 
-// ФУНКЦИЯ РЕАКЦИИ (С защитой от срабатывания клика по сообщению)
 window.addReaction = (event, msgId, emoji) => {
-    event.stopPropagation(); // Остановка клика, чтобы не вылезло удаление
+    event.stopPropagation();
     const reactRef = ref(db, `messages/${msgId}/reactions/${auth.currentUser.uid}`);
     set(reactRef, emoji);
 };
@@ -124,8 +123,8 @@ window.addReaction = (event, msgId, emoji) => {
 const sendMessage = (data) => {
     push(ref(db, 'messages'), { 
         ...data, name: auth.currentUser.displayName, 
-        photo: auth.currentUser.photoURL, uid: auth.currentUser.uid, 
-        time: serverTimestamp() 
+        email: auth.currentUser.email, photo: auth.currentUser.photoURL, 
+        uid: auth.currentUser.uid, time: serverTimestamp() 
     });
 };
 
