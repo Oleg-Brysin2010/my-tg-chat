@@ -3,129 +3,94 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Mlyn — Твой чат</title>
+    <title>Mlyn</title>
     <style>
-        :root { 
-            --bg: #313338; --card: #2b2d31; --input: #1e1f22; 
-            --blurple: #5865f2; --text: #f2f3f5; --muted: #b5bac1; 
-            --accent: #00a8fc; 
-        }
+        :root { --bg: #313338; --card: #2b2d31; --blurple: #5865f2; --text: #f2f3f5; --accent: #00a8fc; }
+        * { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 0; }
         
-        * { box-sizing: border-box; font-family: 'Segoe UI', Roboto, sans-serif; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-        
-        body { 
-            background: var(--bg); 
-            color: var(--text); 
-            height: 100dvh; 
-            display: flex; 
-            flex-direction: column; 
-            overflow: hidden; 
-        }
+        body { background: var(--bg); color: var(--text); height: 100dvh; display: flex; flex-direction: column; overflow: hidden; }
 
-        /* БРЕНДИНГ MLYN */
-        .brand-logo { display: flex; align-items: center; gap: 8px; }
-        .logo-icon { 
-            width: 26px; height: 26px; background: var(--accent); 
-            border-radius: 6px; display: flex; align-items: center; 
-            justify-content: center; color: white; font-weight: 900; 
-            font-size: 16px; clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+        /* ЭКРАН ВХОДА — ТЕПЕРЬ НА ВЕСЬ ЭКРАН */
+        #authSection { 
+            position: fixed; inset: 0; background: var(--bg); z-index: 1000; 
+            display: flex; align-items: center; justify-content: center; padding: 20px; 
         }
-        .brand-name { font-size: 20px; font-weight: 800; color: white; letter-spacing: -0.5px; }
-
-        /* HEADER */
-        .header { 
-            background: var(--card); padding: 10px 15px; 
-            padding-top: calc(env(safe-area-inset-top) + 10px); 
-            border-bottom: 1px solid #1e1f22; display: flex; 
-            justify-content: space-between; align-items: center; flex-shrink: 0; 
-        }
+        .auth-card { background: var(--card); padding: 40px 30px; border-radius: 15px; width: 100%; max-width: 360px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
         
-        #messages { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 12px; scroll-behavior: smooth; }
-        
-        .msg-container { display: flex; flex-direction: column; max-width: 85%; align-self: flex-start; }
-        .msg-container.mine { align-self: flex-end; align-items: flex-end; }
-        .username { font-size: 11px; font-weight: bold; margin-bottom: 2px; color: var(--accent); }
-        .bubble { background: #383a40; padding: 10px 14px; border-radius: 2px 16px 16px 16px; font-size: 15px; line-height: 1.4; word-wrap: break-word; }
-        .mine .bubble { background: var(--blurple); border-radius: 16px 16px 2px 16px; }
-        .chat-img { max-width: 100%; border-radius: 8px; margin-top: 5px; display: block; border: 1px solid rgba(255,255,255,0.1); }
-
-        #typing { font-size: 11px; color: var(--muted); padding: 2px 15px; height: 18px; font-style: italic; }
-
-        /* ПАНЕЛЬ ВВОДА */
-        .input-area { 
-            padding: 10px 15px; 
-            padding-bottom: calc(env(safe-area-inset-bottom) + 10px); 
-            background: var(--bg); border-top: 1px solid #2b2d31; flex-shrink: 0; 
-        }
-        
-        .emoji-bar { display: flex; gap: 12px; padding-bottom: 8px; overflow-x: auto; }
-        .emoji-bar::-webkit-scrollbar { display: none; }
-        .emoji-btn { font-size: 20px; cursor: pointer; }
-
-        .input-row { display: flex; gap: 10px; align-items: center; }
-        .input-wrapper { flex: 1; background: #383a40; border-radius: 22px; display: flex; align-items: center; padding: 0 15px; height: 44px; }
-        #msgInput { background: transparent; border: none; color: white; outline: none; flex: 1; font-size: 16px; }
-        
-        .btn-send { 
-            background: var(--blurple); border: none; border-radius: 50%; 
-            width: 44px; height: 44px; color: white; cursor: pointer; 
+        .logo-big { 
+            width: 60px; height: 60px; background: var(--accent); border-radius: 12px; 
             display: flex; align-items: center; justify-content: center; 
-            font-size: 18px; flex-shrink: 0;
+            color: white; font-weight: 900; font-size: 32px; margin: 0 auto 15px;
+            clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
         }
 
-        /* АВТОРИЗАЦИЯ */
-        #authSection { position: fixed; inset: 0; background: var(--bg); z-index: 100; display: flex; align-items: center; justify-content: center; padding: 20px; }
-        .auth-card { background: var(--card); padding: 30px; border-radius: 12px; width: 100%; max-width: 360px; text-align: center; }
-        .auth-card input { width: 100%; padding: 12px; margin: 8px 0; border-radius: 6px; border: none; background: var(--input); color: white; outline: none; font-size: 16px; }
+        .google-btn { 
+            width: 100%; padding: 14px; background: white; color: #333; border: none; 
+            border-radius: 8px; font-weight: bold; margin-top: 25px; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; gap: 12px; font-size: 16px;
+            transition: 0.2s;
+        }
+        .google-btn:active { transform: scale(0.98); background: #eee; }
+
+        /* ЧАТ */
+        .header { background: var(--card); padding: 15px; border-bottom: 1px solid #1e1f22; display: flex; justify-content: space-between; align-items: center; }
+        #messages { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 10px; }
+        
+        .msg { max-width: 80%; padding: 10px 14px; border-radius: 15px; font-size: 15px; line-height: 1.4; position: relative; }
+        .msg.mine { align-self: flex-end; background: var(--blurple); border-bottom-right-radius: 2px; }
+        .msg.other { align-self: flex-start; background: #383a40; border-bottom-left-radius: 2px; }
+        .u-name { font-size: 10px; font-weight: bold; margin-bottom: 3px; color: var(--accent); }
+        .mine .u-name { color: #fff; text-align: right; }
+
+        .input-area { 
+            padding: 15px; background: var(--bg); border-top: 1px solid #2b2d31;
+            padding-bottom: calc(env(safe-area-inset-bottom) + 15px);
+        }
+        .input-row { display: flex; gap: 10px; }
+        .in-wrap { flex: 1; background: #383a40; border-radius: 25px; padding: 0 15px; display: flex; align-items: center; }
+        input#msgInput { background: transparent; border: none; color: white; flex: 1; height: 45px; outline: none; }
+        
+        .send-btn { background: var(--blurple); border: none; width: 45px; height: 45px; border-radius: 50%; color: white; cursor: pointer; }
     </style>
 </head>
 <body>
 
     <div id="authSection">
         <div class="auth-card">
-            <div class="brand-logo" style="justify-content: center; margin-bottom: 10px;">
-                <div class="logo-icon">M</div>
-                <div class="brand-name" style="font-size: 32px;">Mlyn</div>
-            </div>
-            <p style="color: var(--muted); margin-bottom: 20px; font-size: 14px;">Будущее общения здесь</p>
-            <input type="text" id="nickname" placeholder="Никнейм">
-            <input type="email" id="email" placeholder="Email">
-            <input type="password" id="password" placeholder="Пароль">
-            <button onclick="login()" style="width:100%; padding:14px; background:var(--blurple); border:none; color:white; border-radius:6px; font-weight:bold; margin-top:10px; cursor:pointer;">Войти</button>
-            <p onclick="register()" style="color:var(--accent); margin-top:20px; cursor:pointer; font-size:14px;">Создать новый аккаунт</p>
+            <div class="logo-big">M</div>
+            <h1 style="font-size: 32px; letter-spacing: -1px;">Mlyn</h1>
+            <p style="color: var(--muted); margin-top: 5px;">Добро пожаловать в будущее</p>
+            
+            <button id="googleBtn" class="google-btn">
+                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="20">
+                Войти через Google
+            </button>
         </div>
     </div>
 
     <div class="header">
-        <div class="brand-logo">
-            <div class="logo-icon">M</div>
-            <div class="brand-name">Mlyn</div>
+        <div style="font-weight: bold; display: flex; align-items: center; gap: 8px;">
+            <div style="width:20px; height:20px; background:var(--accent); border-radius:4px; clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);"></div>
+            Mlyn
         </div>
-        <span onclick="logout()" style="opacity:0.5; font-size:12px; cursor:pointer; padding:5px;">Выйти</span>
+        <span onclick="auth.signOut()" style="font-size: 12px; opacity: 0.5;">Выйти</span>
     </div>
 
     <div id="messages"></div>
-    <div id="typing"></div>
 
     <div class="input-area">
-        <div class="emoji-bar">
-            <span class="emoji-btn">🔥</span><span class="emoji-btn">😂</span><span class="emoji-btn">❤️</span>
-            <span class="emoji-btn">👍</span><span class="emoji-btn">😎</span><span class="emoji-btn">💀</span>
-            <span class="emoji-btn">⚡</span>
-        </div>
         <div class="input-row">
-            <label style="font-size:24px; cursor:pointer; padding: 5px;">📎<input type="file" id="fileInput" accept="image/*" style="display:none;"></label>
-            <div class="input-wrapper">
+            <div class="in-wrap">
                 <input type="text" id="msgInput" placeholder="Сообщение..." autocomplete="off">
             </div>
-            <button id="sendBtn" class="btn-send">➤</button>
+            <button id="sendBtn" class="send-btn">➤</button>
         </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, updateProfile, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getDatabase, ref, push, onChildAdded, onChildRemoved, set, onValue, remove, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+        import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getDatabase, ref, push, onChildAdded, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
         const firebaseConfig = { 
             apiKey: "AIzaSyCiduYZfuWiAoJOuTuhmdDRbPWlpL1jmw4", 
@@ -137,80 +102,37 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getDatabase(app);
-        const IMGBB_KEY = "b0ae43a6f86ace22817aa2f7b101fa31";
-
-        const msgsDiv = document.getElementById('messages');
-        const typingDiv = document.getElementById('typing');
-        const msgInput = document.getElementById('msgInput');
+        const provider = new GoogleAuthProvider();
 
         onAuthStateChanged(auth, (user) => {
             document.getElementById('authSection').style.display = user ? 'none' : 'flex';
-            if(user) initChat(user);
+            if(user) loadMessages();
         });
 
-        window.login = () => signInWithEmailAndPassword(auth, email.value, password.value).catch(e => alert("Ошибка входа"));
-        window.register = async () => {
-            if(!nickname.value) return alert("Введите ник");
-            try {
-                const res = await createUserWithEmailAndPassword(auth, email.value, password.value);
-                await updateProfile(res.user, { displayName: nickname.value });
-                location.reload();
-            } catch(e) { alert("Ошибка регистрации"); }
-        };
-        window.logout = () => signOut(auth);
+        document.getElementById('googleBtn').onclick = () => signInWithPopup(auth, provider);
 
-        function initChat(user) {
-            msgInput.oninput = () => {
-                set(ref(db, `typing/${user.uid}`), msgInput.value.length > 0 ? user.displayName : null);
-                if(window.tTimer) clearTimeout(window.tTimer);
-                window.tTimer = setTimeout(() => set(ref(db, `typing/${user.uid}`), null), 2000);
-            };
-
-            onValue(ref(db, 'typing'), (snap) => {
-                const names = Object.values(snap.val() || {}).filter(n => n && n !== user.displayName);
-                typingDiv.innerText = names.length ? `${names.join(', ')} печатает...` : '';
-            });
-
+        function loadMessages() {
+            const msgsDiv = document.getElementById('messages');
+            msgsDiv.innerHTML = '';
             onChildAdded(ref(db, 'messages'), (snap) => {
                 const d = snap.val();
-                const isMine = d.uid === user.uid;
+                const isMine = d.uid === auth.currentUser.uid;
                 const div = document.createElement('div');
-                div.id = 'msg-' + snap.key;
-                div.className = `msg-container ${isMine ? 'mine' : ''}`;
-                if(isMine) div.onclick = () => confirm("Удалить сообщение?") && remove(ref(db, `messages/${snap.key}`));
-                
-                div.innerHTML = `<div class="username">${d.name}</div><div class="bubble">${d.text ? `<div>${d.text}</div>` : ''}${d.image ? `<img src="${d.image}" class="chat-img">` : ''}</div>`;
+                div.className = `msg ${isMine ? 'mine' : 'other'}`;
+                div.innerHTML = `<div class="u-name">${d.name}</div>${d.text}`;
                 msgsDiv.appendChild(div);
                 msgsDiv.scrollTop = msgsDiv.scrollHeight;
             });
-
-            onChildRemoved(ref(db, 'messages'), (snap) => document.getElementById('msg-' + snap.key)?.remove());
         }
 
-        const send = (data) => push(ref(db, 'messages'), { ...data, name: auth.currentUser.displayName, uid: auth.currentUser.uid, time: serverTimestamp() });
-        
-        document.getElementById('sendBtn').onclick = () => { 
-            if(msgInput.value.trim()){ 
-                send({text: msgInput.value}); 
-                msgInput.value = ''; 
-                set(ref(db, `typing/${auth.currentUser.uid}`), null); 
-            } 
+        document.getElementById('sendBtn').onclick = () => {
+            const val = msgInput.value.trim();
+            if(val) {
+                push(ref(db, 'messages'), { text: val, name: auth.currentUser.displayName, uid: auth.currentUser.uid, time: serverTimestamp() });
+                msgInput.value = '';
+            }
         };
-        msgInput.onkeypress = (e) => e.key === 'Enter' && document.getElementById('sendBtn').click();
-        
-        document.querySelectorAll('.emoji-btn').forEach(b => b.onclick = () => { msgInput.value += b.innerText; msgInput.focus(); });
-
-        document.getElementById('fileInput').onchange = async (e) => {
-            const f = e.target.files[0]; if(!f) return;
-            typingDiv.innerText = "☁️ Загрузка в Mlyn...";
-            const fd = new FormData(); fd.append("image", f);
-            try {
-                const r = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_KEY}`, { method: "POST", body: fd });
-                const res = await r.json();
-                send({image: res.data.url});
-            } catch(e) { alert("Ошибка загрузки"); }
-            typingDiv.innerText = "";
-        };
+        window.auth = auth;
     </script>
 </body>
 </html>
