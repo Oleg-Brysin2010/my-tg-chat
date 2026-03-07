@@ -1,6 +1,10 @@
+import { injectSpeedInsights } from 'https://unpkg.com/@vercel/speed-insights/dist/index.mjs';
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 import { getDatabase, ref, push, onChildAdded, onChildRemoved, remove, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+// Запуск аналитики Vercel
+injectSpeedInsights();
 
 const firebaseConfig = { 
     apiKey: "AIzaSyCiduYZfuWiAoJOuTuhmdDRbPWlpL1jmw4", 
@@ -19,6 +23,21 @@ const msgsDiv = document.getElementById('messages');
 const msgInput = document.getElementById('msgInput');
 const statusDiv = document.getElementById('status');
 
+// --- ЛОГИКА ТЕМЫ ---
+const themeBtn = document.getElementById('themeBtn');
+if (localStorage.getItem('theme') === 'light') {
+    document.body.setAttribute('data-theme', 'light');
+    themeBtn.innerText = '🌙';
+}
+
+themeBtn.onclick = () => {
+    let isLight = document.body.getAttribute('data-theme') === 'light';
+    document.body.toggleAttribute('data-theme', !isLight);
+    themeBtn.innerText = isLight ? '☀️' : '🌙';
+    localStorage.setItem('theme', isLight ? 'dark' : 'light');
+};
+
+// --- АВТОРИЗАЦИЯ ---
 onAuthStateChanged(auth, (user) => {
     document.getElementById('authSection').style.display = user ? 'none' : 'flex';
     if(user) loadMessages();
@@ -27,6 +46,7 @@ onAuthStateChanged(auth, (user) => {
 document.getElementById('googleBtn').onclick = () => signInWithPopup(auth, provider);
 window.logout = () => signOut(auth);
 
+// --- ЧАТ ---
 function loadMessages() {
     msgsDiv.innerHTML = '';
     onChildAdded(ref(db, 'messages'), (snap) => {
@@ -67,14 +87,12 @@ const sendMessage = (data) => {
 
 document.getElementById('sendBtn').onclick = () => {
     const val = msgInput.value.trim();
-    if(val) {
-        sendMessage({ text: val });
-        msgInput.value = '';
-    }
+    if(val) { sendMessage({ text: val }); msgInput.value = ''; }
 };
 
 msgInput.onkeypress = (e) => e.key === 'Enter' && document.getElementById('sendBtn').click();
 
+// --- ЗАГРУЗКА ФОТО ---
 document.getElementById('fileInput').onchange = async (e) => {
     const f = e.target.files[0]; if(!f) return;
     statusDiv.innerText = "☁️ Загрузка фото...";
