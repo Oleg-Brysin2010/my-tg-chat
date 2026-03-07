@@ -1,13 +1,9 @@
-// 1. Импорт аналитики Vercel (Скорость и Посетители)
 import { injectSpeedInsights } from 'https://unpkg.com/@vercel/speed-insights/dist/index.mjs';
 import { inject } from 'https://unpkg.com/@vercel/analytics/dist/index.mjs';
-
-// 2. Импорты Firebase
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-import { getDatabase, ref, push, onChildAdded, onChildRemoved, remove, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+import { getDatabase, ref, push, onChildAdded, onChildRemoved, remove, serverTimestamp, set, onDisconnect, onValue, update } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-// Запуск инструментов Vercel
 injectSpeedInsights();
 inject();
 
@@ -28,13 +24,9 @@ const msgsDiv = document.getElementById('messages');
 const msgInput = document.getElementById('msgInput');
 const statusDiv = document.getElementById('status');
 
-// --- ЛОГИКА ТЕМЫ ---
+// --- ТЕМА ---
 const themeBtn = document.getElementById('themeBtn');
-if (localStorage.getItem('theme') === 'light') {
-    document.body.setAttribute('data-theme', 'light');
-    themeBtn.innerText = '🌙';
-}
-
+if (localStorage.getItem('theme') === 'light') { document.body.setAttribute('data-theme', 'light'); themeBtn.innerText = '🌙'; }
 themeBtn.onclick = () => {
     let isLight = document.body.getAttribute('data-theme') === 'light';
     document.body.toggleAttribute('data-theme', !isLight);
@@ -42,10 +34,23 @@ themeBtn.onclick = () => {
     localStorage.setItem('theme', isLight ? 'dark' : 'light');
 };
 
+// --- ОНЛАЙН СТАТУС ---
+function setOnlineStatus(user) {
+    const userStatusRef = ref(db, `status/${user.uid}`);
+    set(userStatusRef, { online: true, name: user.displayName });
+    onDisconnect(userStatusRef).remove();
+}
+
+// --- УВЕДОМЛЕНИЯ ---
+if (Notification.permission !== "granted") Notification.requestPermission();
+
 // --- АВТОРИЗАЦИЯ ---
 onAuthStateChanged(auth, (user) => {
     document.getElementById('authSection').style.display = user ? 'none' : 'flex';
-    if(user) loadMessages();
+    if(user) {
+        setOnlineStatus(user);
+        loadMessages();
+    }
 });
 
 document.getElementById('googleBtn').onclick = () => signInWithPopup(auth, provider);
@@ -62,23 +67,54 @@ function loadMessages() {
         const div = document.createElement('div');
         div.id = 'msg-' + snap.key;
         div.className = `msg-row ${isMine ? 'mine' : ''}`;
-        if(isMine) div.onclick = () => confirm("Удалить сообщение?") && remove(ref(db, `messages/${snap.key}`));
         
         div.innerHTML = `
-            <img src="${d.photo || 'https://via.placeholder.com/40'}" class="avatar">
+            <div class="avatar-container">
+                <img src="${d.photo || 'https://via.placeholder.com/40'}" class="avatar">
+                <div class="online-badge" id="online-${d.uid}" style="display:none;"></div>
+            </div>
             <div class="bubble-wrap">
                 <div class="u-info">${d.name} <span class="time">${time}</span></div>
-                <div class="msg">
+                <div class="msg" onclick="${isMine ? `if(confirm('Удалить?')) remove(ref(db, 'messages/${snap.key}'))` : ''}">
                     ${d.text ? `<div>${d.text}</div>` : ''}
                     ${d.image ? `<img src="${d.image}" class="chat-img">` : ''}
+                </div>
+                <div class="reactions-bar">
+                    <span class="reaction-btn" onclick="addReaction('${snap.key}', '❤️')">❤️ <span id="count-❤️-${snap.key}">0</span></span>
+                    <span class="reaction-btn" onclick="addReaction('${snap.key}', '🔥')">🔥 <span id="count-🔥-${snap.key}">0</span></span>
                 </div>
             </div>
         `;
         msgsDiv.appendChild(div);
         msgsDiv.scrollTop = msgsDiv.scrollHeight;
+
+        // Показ онлайна
+        onValue(ref(db, `status/${d.uid}`), (s) => {
+            const badge = document.getElementById(`online-${d.uid}`);
+            if(badge) badge.style.display = s.exists() ? 'block' : 'none';
+        });
+
+        // Слушатель реакций
+        onValue(ref(db, `messages/${snap.key}/reactions`), (s) => {
+            const reacts = s.val() || {};
+            ['❤️', '🔥'].forEach(emoji => {
+                const count = Object.values(reacts).filter(v => v === emoji).length;
+                document.getElementById(`count-${emoji}-${snap.key}`).innerText = count;
+            });
+        });
+
+        // Пуш-уведомление
+        if (!isMine && d.time > Date.now() - 2000) {
+            new Notification("Mlyn: " + d.name, { body: d.text || "Картинка 🖼️" });
+        }
     });
     onChildRemoved(ref(db, 'messages'), (snap) => document.getElementById('msg-' + snap.key)?.remove());
 }
+
+window.addReaction = (msgId, emoji) => {
+    const reactRef = ref(db, `messages/${msgId}/reactions/${auth.currentUser.uid}`);
+    set(reactRef, emoji);
+};
 
 const sendMessage = (data) => {
     push(ref(db, 'messages'), { 
@@ -97,7 +133,6 @@ document.getElementById('sendBtn').onclick = () => {
 
 msgInput.onkeypress = (e) => e.key === 'Enter' && document.getElementById('sendBtn').click();
 
-// --- ЗАГРУЗКА ФОТО ---
 document.getElementById('fileInput').onchange = async (e) => {
     const f = e.target.files[0]; if(!f) return;
     statusDiv.innerText = "☁️ Загрузка фото...";
