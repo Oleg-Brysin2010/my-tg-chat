@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Mlyn</title>
+    <title>Mlyn 🌾</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -11,6 +11,7 @@
     <div id="authSection">
         <div class="auth-card">
             <h1 style="font-size: 32px; margin-bottom: 10px;">Mlyn</h1>
+            <p style="color: #949ba4; font-size: 14px;">Будущее общения здесь</p>
             <button id="googleBtn" class="google-btn">
                 <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="20">
                 Войти через Google
@@ -19,8 +20,11 @@
     </div>
 
     <div class="header">
-        <div style="font-weight: bold;">Mlyn 🌾</div>
-        <span onclick="logout()" style="font-size: 12px; opacity: 0.5; cursor: pointer;">Выйти</span>
+        <div style="font-weight: bold; display: flex; align-items: center; gap: 8px;">Mlyn 🌾</div>
+        <div style="display: flex; gap: 15px; align-items: center;">
+            <span id="themeBtn" style="cursor: pointer; font-size: 18px;">☀️</span>
+            <span onclick="logout()" style="font-size: 12px; opacity: 0.5; cursor: pointer;">Выйти</span>
+        </div>
     </div>
 
     <div id="messages"></div>
@@ -28,10 +32,7 @@
     <div class="input-area">
         <div id="status" style="font-size: 10px; color: var(--accent); margin-bottom: 5px; height: 12px;"></div>
         <div class="input-row">
-            <label class="attach-btn">
-                📎
-                <input type="file" id="fileInput" accept="image/*" style="display:none;">
-            </label>
+            <label class="attach-btn">📎<input type="file" id="fileInput" accept="image/*" style="display:none;"></label>
             <div class="in-wrap">
                 <input type="text" id="msgInput" placeholder="Сообщение..." autocomplete="off">
             </div>
